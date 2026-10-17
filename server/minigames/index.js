@@ -23,6 +23,11 @@ const MINI = {
   dessin: require('./dessin'),
   telephone: require('./telephone'),
   loupgarou: require('./loupgarou'),
+  pendu: require('./pendu'),
+  quisuisje: require('./quisuisje'),
+  petitbac: require('./petitbac'),
+  taboo: require('./taboo'),
+  codenames: require('./codenames'),
 };
 
 const UNDERCOVER_META = {

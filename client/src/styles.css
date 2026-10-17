@@ -1269,3 +1269,187 @@ button.sea-cell:disabled {
   opacity: 0.75;
   font-weight: 500;
 }
+
+/* --- Pendu, Petit bac, Taboo, Codenames, Qui suis-je ---------------------- */
+
+.gallows {
+  width: 9rem;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+.pendu-word {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.pendu-word span {
+  min-width: 2.2rem;
+  height: 2.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 4px solid var(--fg);
+  font: 800 1.6rem var(--font-display);
+}
+
+.keyboard {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.35rem;
+}
+
+.key {
+  min-height: 2.8rem;
+  border: 2px solid var(--line);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  color: var(--fg);
+  font: 800 1.05rem var(--font-body);
+  cursor: pointer;
+}
+
+.key.good {
+  background: var(--mint);
+  color: var(--ink);
+  border-color: var(--mint);
+}
+
+.key.bad {
+  background: var(--tomato);
+  color: var(--ink);
+  border-color: var(--tomato);
+}
+
+.key:disabled {
+  cursor: not-allowed;
+}
+
+.big-letter {
+  display: inline-block;
+  padding: 0 0.6rem;
+  border-radius: 0.6rem;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+}
+
+.btn.small {
+  min-height: 2.2rem;
+  padding: 0.2rem 0.9rem;
+  font-size: 0.95rem;
+}
+
+.btn.danger {
+  background: var(--tomato);
+  color: var(--ink);
+}
+
+.scorebar {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.9rem;
+  background: var(--surface);
+}
+
+.taboo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.2rem;
+  border-radius: 1.2rem;
+  background: var(--snow);
+  color: var(--ink);
+  text-align: center;
+}
+
+.taboo-card .muted {
+  color: rgba(27, 20, 51, 0.7);
+}
+
+.taboo-card .chips {
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.taboo-card .chip.static {
+  border-color: var(--tomato);
+  color: var(--ink);
+}
+
+.taboo-word {
+  margin: 0;
+  font: 800 clamp(1.8rem, 9vw, 2.6rem) var(--font-display);
+}
+
+.cn-board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
+}
+
+.cn-card {
+  min-height: 3.6rem;
+  padding: 0.2rem;
+  border: 3px solid transparent;
+  border-radius: 0.6rem;
+  background: var(--snow);
+  color: var(--ink);
+  font: 700 0.72rem var(--font-body);
+  word-break: break-word;
+  hyphens: auto;
+  cursor: pointer;
+}
+
+.cn-card:disabled {
+  cursor: default;
+}
+
+.cn-card.c-rouge.revealed,
+.cn-card.c-rouge.spy {
+  background: #e5484d;
+  color: #fff;
+}
+
+.cn-card.c-bleu.revealed,
+.cn-card.c-bleu.spy {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.cn-card.c-neutre.revealed {
+  background: #cbbfa8;
+}
+
+.cn-card.c-assassin.revealed,
+.cn-card.c-assassin.spy {
+  background: #111;
+  color: #fff;
+}
+
+.cn-card.spy {
+  opacity: 0.85;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.cn-card.c-neutre.spy {
+  background: #e6dcc6;
+}
+
+.cn-card.revealed {
+  opacity: 1;
+}
+
+@media (min-width: 480px) {
+  .cn-card {
+    font-size: 0.85rem;
+  }
+}

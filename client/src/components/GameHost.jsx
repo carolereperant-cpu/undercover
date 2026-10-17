@@ -11,6 +11,11 @@ import Quiz from '../games/Quiz.jsx';
 import Dessin from '../games/Dessin.jsx';
 import Telephone from '../games/Telephone.jsx';
 import LoupGarou from '../games/LoupGarou.jsx';
+import Pendu from '../games/Pendu.jsx';
+import QuiSuisJe from '../games/QuiSuisJe.jsx';
+import PetitBac from '../games/PetitBac.jsx';
+import Taboo from '../games/Taboo.jsx';
+import Codenames from '../games/Codenames.jsx';
 
 // Un écran par mini-jeu. Pour ajouter un jeu : un composant dans games/ et une ligne ici.
 const SCREENS = {
@@ -27,6 +32,11 @@ const SCREENS = {
   dessin: Dessin,
   telephone: Telephone,
   loupgarou: LoupGarou,
+  pendu: Pendu,
+  quisuisje: QuiSuisJe,
+  petitbac: PetitBac,
+  taboo: Taboo,
+  codenames: Codenames,
 };
 
 export default function GameHost(props) {

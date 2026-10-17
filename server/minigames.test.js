@@ -584,6 +584,39 @@ test('simulation : chaque jeu se termine avec des joueurs aléatoires', () => {
             }
             act(room, host, 'next');
           },
+          pendu: () => {
+            const master = room.players.find((p) => p.id === mg.masters[mg.round - 1]);
+            act(room, master, 'word', { text: 'mot' + 'abcdefghijklmnopqrstuvwxyz'[rnd(26)] });
+            act(room, any, 'letter', { letter: 'abcdefghijklmnopqrstuvwxyz'[rnd(26)] });
+            if (rnd(4) === 0) act(room, any, 'solve', { text: 'xyz' });
+            act(room, host, 'next');
+          },
+          quisuisje: () => {
+            const target = room.players[rnd(n)];
+            act(room, target, 'guess', { text: rnd(3) === 0 ? mg.cards[target.id][0] : 'zzz' });
+            if (rnd(30) === 0) act(room, host, 'end');
+          },
+          petitbac: () => {
+            act(room, any, 'submit', { answers: ['a', 'b', 'c', 'd', 'e', 'f'].map((x) => x + rnd(3)) });
+            if (rnd(3) === 0) act(room, host, 'force');
+            if (rnd(2)) act(room, host, 'reject', { playerId: any.id, index: rnd(6) });
+            act(room, host, 'next');
+          },
+          taboo: () => {
+            const { id: describer } = mg.describers[mg.turn - 1];
+            act(room, rnd(2) ? describer : host, 'start');
+            act(room, describer, rnd(2) ? 'found' : 'pass');
+            act(room, any, 'taboo');
+            if (rnd(2)) act(room, host, 'force');
+            act(room, host, 'next');
+          },
+          codenames: () => {
+            const sp = room.players.find((p) => p.id === mg.spymasters[mg.turn]);
+            act(room, sp, 'clue', { word: 'zz' + rnd(99), number: 1 + rnd(3) });
+            act(room, any, 'guess', { index: rnd(25) });
+            if (rnd(3) === 0) act(room, any, 'endTurn');
+            if (rnd(10) === 0) act(room, host, 'pass');
+          },
           des: () => {
             const turn = room.players.find((p) => p.id === mg.turnId);
             if (mg.phase === 'bid' && turn) {
