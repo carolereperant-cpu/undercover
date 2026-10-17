@@ -1,15 +1,8 @@
 import { useState } from 'react';
 import { useGame } from './useGame.js';
 import Home from './components/Home.jsx';
-import Lobby from './components/Lobby.jsx';
-import Reveal from './components/Reveal.jsx';
-import Discussion from './components/Discussion.jsx';
-import Vote from './components/Vote.jsx';
-import Result from './components/Result.jsx';
-import WhiteGuess from './components/WhiteGuess.jsx';
-import GameOver from './components/GameOver.jsx';
+import CurrentScreen from './components/CurrentScreen.jsx';
 import Rules from './components/Rules.jsx';
-import GameHost from './components/GameHost.jsx';
 
 export default function App() {
   const game = useGame();
@@ -25,20 +18,7 @@ export default function App() {
   } else if (!state) {
     screen = <Home create={create} join={join} notify={notify} />;
   } else {
-    const props = { state, act, notify };
-    const isMini = Boolean(state.gameType);
-    const screens = isMini
-      ? { lobby: <Lobby {...props} />, playing: <GameHost {...props} leave={leave} />, end: <GameHost {...props} leave={leave} /> }
-      : {
-      lobby: <Lobby {...props} />,
-      reveal: <Reveal {...props} />,
-      discussion: <Discussion {...props} />,
-      vote: <Vote {...props} />,
-      result: <Result {...props} />,
-      whiteGuess: <WhiteGuess {...props} />,
-      end: <GameOver {...props} leave={leave} />,
-    };
-    screen = screens[phase];
+    screen = <CurrentScreen state={state} act={act} notify={notify} leave={leave} />;
   }
 
   const confirmLeave = () => {
