@@ -577,8 +577,13 @@ function viewFor(room, playerId) {
 
   // Mini-jeux : chacun reçoit sa propre vue, et le propriétaire reçoit aussi celle de ses invités.
   if (room.gameType !== 'undercover') {
+    const mod = MINI[room.gameType];
+    // Certains jeux (le quiz) utilisent les thèmes choisis par l'hôte dans la salle d'attente.
+    if (phase === 'lobby' && mod.meta.themes) {
+      view.options = { themes: [...room.options.themes] };
+      view.themes = THEMES.map((t) => ({ id: t.id, label: t.label, emoji: t.emoji, count: mod.themeCount(t.id) }));
+    }
     if (phase !== 'lobby') {
-      const mod = MINI[room.gameType];
       view.mg = mod.view(room, playerId);
       const mine = guestsOf(room, playerId);
       if (mine.length > 0) view.mgGuests = Object.fromEntries(mine.map((guest) => [guest.id, mod.view(room, guest.id)]));

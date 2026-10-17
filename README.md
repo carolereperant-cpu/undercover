@@ -21,7 +21,7 @@ npm run dev:client      # terminal 2 : l'interface sur http://localhost:5173
 
 Vite affiche aussi une adresse du type `http://192.168.x.x:5173` : ouvre-la sur ton téléphone.
 
-Pour vérifier que tout fonctionne : `npm test` (64 tests).
+Pour vérifier que tout fonctionne : `npm test` (87 tests).
 
 
 
@@ -40,8 +40,17 @@ L'accueil propose un menu de jeux, filtrable par nombre de joueurs et par durée
 | Puissance 4 | 2 | 5 min |
 | Bataille navale | 2 | 10 à 15 min |
 | Dés menteurs | 2 à 6 | 10 à 15 min |
+| Just One (coopératif) | 3 à 13 | 15 min |
+| Quiz buzzer (100 questions, par thème) | 2 à 13 | 10 à 15 min |
+| Dessiner c'est gagné (papier-crayon) | 3 à 13 | 15 min |
+| Téléphone dessin (papier-crayon) | 4 à 13 | 15 à 20 min |
+| Loup-Garou express (le serveur est le narrateur) | 5 à 13 | 15 à 20 min |
 
 **Ajouter un jeu** : créer `server/minigames/monjeu.js` (fiche `meta`, `init`, `act`, `view`), le déclarer dans `server/minigames/index.js`, puis ajouter son écran dans `client/src/games/` et une ligne dans `client/src/components/GameHost.jsx`. La règle d'or reste la même : `view(room, playerId)` ne renvoie que ce que ce joueur a le droit de voir (ses dés, son mot, jamais ceux des autres).
+
+**Jeux à chronomètre** (Quiz, Dessiner c'est gagné) : le serveur fixe l'échéance (`deadline`) et les téléphones affichent le compte à rebours avec l'horloge du serveur. À la fin du temps, chaque téléphone envoie `timeup`, mais le serveur ne l'accepte que si l'échéance est vraiment passée : un joueur ne peut donc pas écourter la manche.
+
+**Questions du quiz** : `server/minigames/quizdata.js`, une ligne par question dans le bon thème (les mêmes thèmes que les mots d'Undercover, choisis par l'hôte dans la salle d'attente).
 
 **Mode dessin d'Undercover** : option de la salle d'attente. L'appli donne toujours les mots et les rôles, mais au lieu de donner un indice à voix haute, chacun dessine son mot sur une feuille réelle, les uns derrière les autres.
 

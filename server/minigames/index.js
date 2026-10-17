@@ -18,6 +18,11 @@ const MINI = {
   puissance4: require('./puissance4'),
   bataille: require('./bataille'),
   des: require('./des'),
+  justone: require('./justone'),
+  quiz: require('./quiz'),
+  dessin: require('./dessin'),
+  telephone: require('./telephone'),
+  loupgarou: require('./loupgarou'),
 };
 
 const UNDERCOVER_META = {

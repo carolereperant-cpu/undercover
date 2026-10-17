@@ -1175,3 +1175,97 @@ button.sea-cell:disabled {
     transition: none;
   }
 }
+
+/* --- Jeux ajoutés : quiz, dessin, téléphone, loup-garou ------------------- */
+
+.timer {
+  position: relative;
+  height: 2.2rem;
+  border-radius: 999px;
+  background: var(--surface);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgba(251, 248, 255, 0.22);
+  transition: width 0.3s linear;
+}
+
+.timer strong {
+  position: relative;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer.low .timer-bar {
+  background: var(--tomato);
+}
+
+.quiz-q {
+  font-size: clamp(1.3rem, 5.5vw, 1.8rem);
+  line-height: 1.25;
+}
+
+.vote-btn b,
+.choice b {
+  display: inline-block;
+  min-width: 1.6rem;
+  margin-right: 0.35rem;
+  font-family: var(--font-display);
+}
+
+.choice-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.choice {
+  padding: 0.7rem 1rem;
+  border-radius: 0.9rem;
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.choice.good {
+  background: var(--mint);
+  color: var(--ink);
+}
+
+.feed {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.feed li {
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.8rem;
+  background: var(--surface);
+}
+
+.story-steps {
+  margin: 0;
+  padding-left: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.hold small {
+  display: block;
+  margin-top: 0.4rem;
+  font-weight: 600;
+}
+
+.chip small {
+  opacity: 0.75;
+  font-weight: 500;
+}

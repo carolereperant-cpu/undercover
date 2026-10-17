@@ -26,7 +26,8 @@ export default function Lobby({ state, act, notify }) {
   const link = `${window.location.origin}/?salle=${code}`;
 
   const share = async () => {
-    const data = { title: 'Undercover', text: `Rejoins ma partie d’Undercover (salle ${code})`, url: link };
+    const gameName = miniGame ? miniGame.label : 'Undercover';
+    const data = { title: gameName, text: `Rejoins ma partie de ${gameName} (salle ${code})`, url: link };
     try {
       if (navigator.share) {
         await navigator.share(data);
@@ -47,9 +48,11 @@ export default function Lobby({ state, act, notify }) {
     if (res.ok) setGuestName('');
   };
 
-  const allThemes = isMini ? [] : themes.map((t) => t.id);
-  const selected = new Set(isMini ? [] : options.themes);
-  const allSelected = !isMini && selected.size === themes.length;
+  // Les thèmes servent à Undercover et aux mini-jeux qui le demandent (le quiz).
+  const usesThemes = !isMini || Boolean(miniGame.themes);
+  const allThemes = usesThemes ? themes.map((t) => t.id) : [];
+  const selected = new Set(usesThemes ? options.themes : []);
+  const allSelected = usesThemes && selected.size === themes.length;
   const toggleTheme = (id) => {
     const next = selected.has(id) ? allThemes.filter((t) => t !== id && selected.has(t)) : allThemes.filter((t) => t === id || selected.has(t));
     if (next.length === 0) {
@@ -58,7 +61,7 @@ export default function Lobby({ state, act, notify }) {
     }
     act('host:options', { themes: next });
   };
-  const pairCount = isMini ? 0 : themes.filter((t) => selected.has(t.id)).reduce((sum, t) => sum + t.count, 0);
+  const pairCount = usesThemes ? themes.filter((t) => selected.has(t.id)).reduce((sum, t) => sum + t.count, 0) : 0;
 
   const ownerName = (id) => players.find((p) => p.id === id)?.name ?? '';
 
@@ -175,9 +178,9 @@ export default function Lobby({ state, act, notify }) {
       </section>
       )}
 
-      {!isMini && (
+      {usesThemes && (
       <section className="stack tight">
-        <h2>Thèmes des mots</h2>
+        <h2>{isMini ? 'Thèmes des questions' : 'Thèmes des mots'}</h2>
         {isHost ? (
           <>
             <ul className="chips">
@@ -202,7 +205,10 @@ export default function Lobby({ state, act, notify }) {
             >
               Tout mélanger
             </button>
-            <p className="muted">{pairCount} paires de mots possibles avec ta sélection.</p>
+            <p className="muted">
+              {isMini ? `${pairCount} questions possibles avec ta sélection.` : `${pairCount} paires de mots possibles avec ta sélection.`}
+            </p>
+            {!isMini && (
             <label className="switch">
               <input
                 type="checkbox"
@@ -214,6 +220,7 @@ export default function Lobby({ state, act, notify }) {
                 <small>Plus facile pour Mr White, qui connaît alors la catégorie</small>
               </span>
             </label>
+            )}
           </>
         ) : (
           <p className="muted">

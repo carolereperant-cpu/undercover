@@ -23,13 +23,15 @@ export function useGame() {
   const act = useCallback(
     (event, payload = {}) =>
       new Promise((resolve) => {
-        socket.timeout(8000).emit(event, payload, (err, res) => {
+        // `quiet` : l'erreur éventuelle n'est pas affichée (ex. fin du temps envoyée par tous les joueurs à la fois).
+        const { quiet, ...data } = payload;
+        socket.timeout(8000).emit(event, data, (err, res) => {
           if (err) {
-            notify('Le serveur ne répond pas. Vérifie ta connexion.');
+            if (!quiet) notify('Le serveur ne répond pas. Vérifie ta connexion.');
             resolve({ ok: false });
             return;
           }
-          if (res && !res.ok && res.error) notify(res.error);
+          if (res && !res.ok && res.error && !quiet) notify(res.error);
           resolve(res || { ok: true });
         });
       }),

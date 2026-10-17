@@ -543,6 +543,47 @@ test('simulation : chaque jeu se termine avec des joueurs aléatoires', () => {
             room.players.forEach((p) => act(room, p, 'ready'));
             if (mg.turn) act(room, room.players.find((p) => p.id === mg.turn), 'fire', { r: rnd(10), c: rnd(10) });
           },
+          justone: () => {
+            const guesser = mg.order[(mg.round - 1) % mg.order.length];
+            act(room, any, 'clue', { text: `i${rnd(3)}` });
+            if (rnd(2)) act(room, room.players.find((p) => p.id === guesser), 'guess', { text: `x${rnd(9)}` });
+            else act(room, host, 'pass');
+            act(room, host, 'force'); act(room, host, 'next');
+          },
+          quiz: () => {
+            act(room, any, 'answer', { choice: rnd(4) });
+            if (rnd(4) === 0) act(room, host, 'force');
+            act(room, host, 'next');
+          },
+          dessin: () => {
+            const drawer = room.players.find((p) => p.id === mg.drawers[mg.round - 1]);
+            act(room, rnd(2) ? drawer : host, 'start');
+            act(room, any, 'guess', { text: `m${rnd(50)}` });
+            if (rnd(3) === 0) act(room, host, 'force');
+            act(room, host, 'next');
+          },
+          telephone: () => {
+            act(room, any, 'drawn'); act(room, any, 'describe', { text: 'blabla' });
+            if (rnd(3) === 0) act(room, host, 'force');
+            act(room, host, 'next');
+          },
+          loupgarou: () => {
+            const live = room.players.filter((p) => mg.alive[p.id]);
+            const pickLive = () => live[rnd(live.length)];
+            act(room, host, 'start');
+            if (mg.phase === 'night') {
+              act(room, any, 'wolf', { targetId: pickLive().id });
+              act(room, any, 'see', { targetId: pickLive().id });
+              act(room, any, 'witch', { heal: rnd(2) === 0, poisonId: rnd(3) === 0 ? pickLive().id : null });
+              if (rnd(3) === 0) act(room, host, 'force');
+            }
+            if (mg.phase === 'hunter') act(room, any, 'shoot', { targetId: pickLive().id });
+            if (mg.phase === 'vote') {
+              act(room, any, 'vote', { targetId: pickLive().id });
+              if (rnd(3) === 0) act(room, host, 'force');
+            }
+            act(room, host, 'next');
+          },
           des: () => {
             const turn = room.players.find((p) => p.id === mg.turnId);
             if (mg.phase === 'bid' && turn) {

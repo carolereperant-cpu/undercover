@@ -98,4 +98,24 @@ const LOCATIONS = [
   'La ferme', 'Le stade de foot', 'La station de ski', 'Le salon de coiffure', 'L’église',
 ];
 
-module.exports = { QUESTIONS, DEFINITIONS, LOCATIONS };
+/** « Just One » : mots à faire deviner (noms courants, faciles à décrire en un mot). */
+const JUST_ONE_WORDS = [
+  'Plage', 'Pyramide', 'Chocolat', 'Football', 'Cinéma', 'Bibliothèque', 'Volcan', 'Pirate', 'Sorcière', 'Montagne',
+  'Hôpital', 'Anniversaire', 'Vacances', 'Parachute', 'Guitare', 'Boulangerie', 'Cirque', 'Désert', 'Fromage', 'Océan',
+  'Forêt', 'Château', 'Miroir', 'Orage', 'Piscine', 'Neige', 'Champignon', 'Mariage', 'Fusée', 'Tortue',
+  'Dentiste', 'Marché', 'Train', 'Carnaval', 'Dinosaure', 'Lunettes', 'Détective', 'Tempête', 'Jardin', 'Radio',
+  'Cuisine', 'Boussole', 'Trésor', 'Fantôme', 'Aéroport', 'Université', 'Magicien', 'Camping', 'Bonbon', 'Cascade',
+  'Horloge', 'Musée', 'Théâtre', 'Vampire', 'Laboratoire', 'Cheval', 'Parapluie', 'Poisson', 'Piano', 'Pompier',
+];
+
+/** « Dessiner c'est gagné » et « Téléphone dessin » : mots faciles à dessiner. */
+const DRAW_WORDS = [
+  'Chat', 'Maison', 'Voiture', 'Avion', 'Bateau', 'Arbre', 'Soleil', 'Lune', 'Étoile', 'Fleur',
+  'Vélo', 'Escargot', 'Girafe', 'Éléphant', 'Requin', 'Pizza', 'Hamburger', 'Banane', 'Parapluie', 'Lunettes',
+  'Guitare', 'Piano', 'Téléphone', 'Ordinateur', 'Clé', 'Château', 'Pont', 'Montagne', 'Volcan', 'Fusée',
+  'Robot', 'Fantôme', 'Dragon', 'Sirène', 'Pirate', 'Cowboy', 'Tortue', 'Papillon', 'Araignée', 'Crocodile',
+  'Pingouin', 'Ours', 'Lapin', 'Chapeau', 'Chaussure', 'Horloge', 'Balançoire', 'Tente', 'Phare', 'Moulin',
+  'Tracteur', 'Gâteau', 'Glace', 'Couronne', 'Lit', 'Échelle', 'Bougie', 'Cadeau', 'Bonhomme de neige', 'Tour Eiffel',
+];
+
+module.exports = { QUESTIONS, DEFINITIONS, LOCATIONS, JUST_ONE_WORDS, DRAW_WORDS };

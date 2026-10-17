@@ -259,3 +259,37 @@ test('hub : la liste des jeux est servie, et un mini-jeu se joue en réseau (Pui
   assert.equal(after.mg.turn, after.mg.mine, 'c’est maintenant au second joueur');
   for (const c of [a, b]) c.socket.close();
 });
+
+test('quiz en réseau : thèmes dans la salle, un invité répond, les réponses des autres restent cachées', async () => {
+  const list = await (await fetch(`http://localhost:${port}/api/games`)).json();
+  for (const id of ['justone', 'quiz', 'dessin', 'telephone', 'loupgarou']) assert.ok(list.some((g) => g.id === id), id);
+
+  const [a, b] = ['Ana', 'Ben'].map(makeClient);
+  await Promise.all([a.ready, b.ready]);
+  const created = await a.emit('room:create', { name: 'Ana', gameType: 'quiz' });
+  assert.ok(created.ok);
+  assert.ok((await b.emit('room:join', { code: created.code, name: 'Ben' })).ok);
+  const lobby = await a.waitFor((s) => s.players.length === 2);
+  assert.equal(lobby.themes.length, 9, 'les thèmes sont proposés aux hôtes du quiz');
+  assert.ok((await a.emit('host:options', { themes: ['films', 'series'] })).ok);
+  const chosen = await b.waitFor((s) => s.options && s.options.themes.length === 2);
+  assert.deepEqual(chosen.options.themes, ['films', 'series']);
+  assert.ok((await a.emit('guest:add', { name: 'Léo' })).ok);
+  await a.waitFor((s) => s.players.length === 3);
+  assert.ok((await a.emit('host:start')).ok);
+  const started = await a.waitFor((s) => s.phase === 'playing' && s.mg);
+  assert.equal(started.mg.total, 10);
+  assert.ok(started.mgGuests, 'l’hôte reçoit aussi la vue de son invité');
+  const guestId = Object.keys(started.mgGuests)[0];
+  assert.ok((await a.emit('game:act', { type: 'answer', choice: 1, asId: guestId })).ok, 'répondre au nom de l’invité');
+  assert.equal((await b.emit('game:act', { type: 'timeup', asId: guestId })).ok, false, 'on ne joue pas pour l’invité d’un autre');
+  assert.equal((await b.emit('game:act', { type: 'timeup' })).ok, false, 'le temps n’est pas écoulé');
+  const seenByB = await b.waitFor((s) => s.mg && s.mg.answered.length === 1);
+  assert.equal(seenByB.mg.myChoice, null, 'Ben ne voit pas ce qu’a répondu l’invité');
+  assert.equal(seenByB.mg.result, null);
+  assert.ok((await b.emit('game:act', { type: 'answer', choice: 0 })).ok);
+  assert.ok((await a.emit('game:act', { type: 'answer', choice: 2 })).ok);
+  const result = await a.waitFor((s) => s.mg && s.mg.phase === 'result');
+  assert.equal(result.mg.result.answers.length, 3);
+  for (const c of [a, b]) c.socket.close();
+});

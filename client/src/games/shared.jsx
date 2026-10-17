@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SeatPicker from '../components/SeatPicker.jsx';
 import { buildMgSeats, withSeat } from '../seats.js';
 
@@ -114,5 +114,42 @@ export function Ranking({ players, rows, unit }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+/**
+ * Compte à rebours basé sur l'horloge du serveur (pour ne pas dépendre de l'heure du téléphone).
+ * `onZero` est appelé une seule fois par échéance, quand le temps est écoulé.
+ */
+export function useCountdown(deadline, serverNow, onZero) {
+  const [left, setLeft] = useState(() => (deadline ? Math.max(0, Math.ceil((deadline - serverNow) / 1000)) : 0));
+  const callback = useRef(onZero);
+  callback.current = onZero;
+  const firedFor = useRef(null);
+  useEffect(() => {
+    if (!deadline) return undefined;
+    const offset = serverNow - Date.now(); // écart entre l'horloge du serveur et celle de ce téléphone
+    const tick = () => {
+      const ms = deadline - (Date.now() + offset);
+      setLeft(Math.max(0, Math.ceil(ms / 1000)));
+      if (ms <= 0 && firedFor.current !== deadline) {
+        firedFor.current = deadline;
+        callback.current?.();
+      }
+    };
+    tick();
+    const id = setInterval(tick, 250);
+    return () => clearInterval(id);
+  }, [deadline, serverNow]);
+  return left;
+}
+
+export function Timer({ left, total }) {
+  const pct = total ? Math.max(0, Math.min(100, (left / total) * 100)) : 0;
+  return (
+    <div className={`timer ${left <= 5 ? 'low' : ''}`} role="timer" aria-label={`${left} secondes restantes`}>
+      <span className="timer-bar" style={{ width: `${pct}%` }} />
+      <strong>{left} s</strong>
+    </div>
   );
 }
