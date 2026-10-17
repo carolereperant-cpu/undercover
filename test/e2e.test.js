@@ -175,3 +175,35 @@ test('en-têtes de sécurité et santé du serveur', async () => {
   assert.equal(page.status, 200);
   assert.match(await page.text(), /<div id="root">/);
 });
+
+test('joueur invité : le propriétaire agit pour lui, les autres non', async () => {
+  const clients = ['Hôte', 'Alice', 'Bob'].map(makeClient);
+  await Promise.all(clients.map((c) => c.ready));
+  const [host, alice, bob] = clients;
+  const created = await host.emit('room:create', { name: 'Hôte' });
+  for (const c of [alice, bob]) assert.ok((await c.emit('room:join', { code: created.code, name: c.name })).ok);
+
+  // Alice fait jouer Léo sur son écran
+  assert.ok((await alice.emit('guest:add', { name: 'Léo' })).ok);
+  assert.equal((await alice.emit('guest:add', { name: 'léo' })).ok, false);
+  const lobby = await host.waitFor((s) => s.players.length === 4);
+  const leo = lobby.players.find((p) => p.name === 'Léo');
+  assert.equal(leo.guest, true);
+  assert.equal((await bob.emit('guest:remove', { guestId: leo.id })).ok, false, 'Bob ne peut pas retirer Léo');
+
+  assert.ok((await host.emit('host:start')).ok);
+  await Promise.all(clients.map((c) => c.waitFor((s) => s.phase === 'reveal')));
+  await alice.waitFor((s) => s.guests && s.guests.length === 1);
+  assert.ok(alice.state.guests[0].me.word !== undefined);
+  assert.equal(host.state.guests, undefined, 'l’hôte ne voit pas les secrets de Léo');
+  assert.equal(bob.state.guests, undefined);
+
+  // Bob essaie d'agir à la place de Léo : refusé. Alice : acceptée.
+  assert.equal((await bob.emit('player:ready', { asId: leo.id })).ok, false);
+  assert.equal((await alice.emit('player:ready', { asId: 'inconnu' })).ok, false);
+  assert.ok((await alice.emit('player:ready', { asId: leo.id })).ok);
+  const seen = await host.waitFor((s) => s.players.find((p) => p.id === leo.id).ready);
+  assert.ok(seen);
+
+  for (const c of clients) c.socket.close();
+});

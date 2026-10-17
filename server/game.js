@@ -121,10 +121,11 @@ function generateCode(isTaken) {
   return null;
 }
 
-function makePlayer(name) {
+function makePlayer(name, ownerId = null) {
   return {
     id: crypto.randomBytes(4).toString('hex'), // public : sert à désigner un joueur (vote…)
-    token: crypto.randomUUID(), // SECRET : sert à se reconnecter, n'est jamais envoyé aux autres
+    token: ownerId ? null : crypto.randomUUID(), // SECRET : sert à se reconnecter, n'est jamais envoyé aux autres
+    ownerId, // joueur invité : l'id du joueur qui le fait jouer sur son écran (sinon null)
     name,
     socketId: null,
     connected: false,
@@ -141,6 +142,17 @@ function makePlayer(name) {
 function getPlayer(room, id) {
   return room.players.find((p) => p.id === id) || null;
 }
+
+/** Un joueur invité est "en ligne" tant que son propriétaire l'est. */
+function isOnline(room, p) {
+  if (p.ownerId) {
+    const owner = getPlayer(room, p.ownerId);
+    return Boolean(owner && owner.connected);
+  }
+  return p.connected;
+}
+
+const guestsOf = (room, ownerId) => room.players.filter((p) => p.ownerId === ownerId);
 
 function findByToken(room, token) {
   if (typeof token !== 'string') return null;
@@ -180,8 +192,42 @@ function addPlayer(room, rawName) {
   return ok({ player });
 }
 
+const MAX_GUESTS_PER_PLAYER = 3;
+
+/**
+ * Ajoute un joueur "sur l'écran" de ownerId (un enfant sans smartphone, par exemple).
+ * Il n'a ni jeton ni connexion : c'est son propriétaire qui agit pour lui.
+ */
+function addGuest(room, ownerId, rawName) {
+  if (room.phase !== 'lobby') return err('La partie a déjà commencé.');
+  const owner = getPlayer(room, ownerId);
+  if (!owner || owner.ownerId) return err('Joueur introuvable.');
+  if (guestsOf(room, ownerId).length >= MAX_GUESTS_PER_PLAYER) {
+    return err(`Tu peux faire jouer ${MAX_GUESTS_PER_PLAYER} personnes sur ton écran au maximum.`);
+  }
+  if (room.players.length >= MAX_PLAYERS) return err(`La salle est pleine (${MAX_PLAYERS} joueurs maximum).`);
+  const name = cleanText(rawName, NAME_MAX);
+  if (!name) return err('Choisis un prénom.');
+  if (room.players.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
+    return err('Ce prénom est déjà pris dans la salle.');
+  }
+  const guest = makePlayer(name, ownerId);
+  room.players.push(guest);
+  return ok({ player: guest });
+}
+
+function removeGuest(room, ownerId, guestId) {
+  if (room.phase !== 'lobby') return err('Impossible en cours de partie.');
+  const guest = getPlayer(room, guestId);
+  if (!guest || guest.ownerId !== ownerId) return err('Ce joueur n’est pas sur ton écran.');
+  room.players = room.players.filter((p) => p.id !== guestId);
+  return ok();
+}
+
+/** Le nouvel hôte est toujours un vrai joueur (jamais un invité), de préférence connecté. */
 function transferHost(room) {
-  const next = room.players.find((p) => p.connected && p.id !== room.hostId) || room.players.find((p) => p.id !== room.hostId);
+  const real = room.players.filter((p) => !p.ownerId && p.id !== room.hostId);
+  const next = real.find((p) => p.connected) || real[0];
   if (next) room.hostId = next.id;
 }
 
@@ -189,7 +235,8 @@ function transferHost(room) {
 function removePlayer(room, playerId) {
   if (room.phase !== 'lobby') return err('Impossible de retirer un joueur en cours de partie.');
   const wasHost = room.hostId === playerId;
-  room.players = room.players.filter((p) => p.id !== playerId);
+  // Retirer un joueur retire aussi ceux qui jouaient sur son écran.
+  room.players = room.players.filter((p) => p.id !== playerId && p.ownerId !== playerId);
   if (wasHost && room.players.length > 0) transferHost(room);
   return ok();
 }
@@ -461,7 +508,7 @@ function investigate(room, playerId, targetId) {
 function rematch(room, actorId) {
   if (room.hostId !== actorId) return err('Seul l’hôte peut relancer une partie.');
   if (room.phase !== 'end') return err('La partie n’est pas terminée.');
-  room.players = room.players.filter((p) => p.connected || p.id === room.hostId);
+  room.players = room.players.filter((p) => isOnline(room, p) || p.id === room.hostId);
   if (!getPlayer(room, room.hostId)?.connected) transferHost(room);
   for (const p of room.players) {
     p.alive = true;
@@ -480,6 +527,19 @@ function rematch(room, actorId) {
 // ---------------------------------------------------------------------------
 // Ce que chaque joueur a le droit de voir
 // ---------------------------------------------------------------------------
+
+/** Ce qu'un joueur a le droit de savoir sur lui-même (l'Undercover se croit civil). */
+function secretFor(p, phase) {
+  return {
+    alive: p.alive,
+    role: p.role === ROLE.UNDERCOVER ? ROLE.CIVIL : p.role,
+    word: p.word,
+    shieldUsed: p.shieldUsed,
+    investigation: p.investigation,
+    canInvestigate:
+      p.role === ROLE.DETECTIVE && p.alive && !p.investigation && (phase === 'discussion' || phase === 'vote'),
+  };
+}
 
 function didWin(role, winner) {
   if (winner === 'mrwhite') return role === ROLE.MRWHITE;
@@ -507,8 +567,10 @@ function viewFor(room, playerId) {
     players: room.players.map((p) => ({
       id: p.id,
       name: p.name,
+      guest: Boolean(p.ownerId),
+      ownerId: p.ownerId,
       alive: p.alive,
-      connected: p.connected,
+      connected: isOnline(room, p),
       isHost: p.id === room.hostId,
       ready: p.ready,
       revealed: p.revealed,
@@ -522,16 +584,17 @@ function viewFor(room, playerId) {
     return view;
   }
 
-  if (me && me.role) {
-    view.me = {
-      alive: me.alive,
-      role: me.role === ROLE.UNDERCOVER ? ROLE.CIVIL : me.role,
-      word: me.word,
-      shieldUsed: me.shieldUsed,
-      investigation: me.investigation,
-      canInvestigate:
-        me.role === ROLE.DETECTIVE && me.alive && !me.investigation && (phase === 'discussion' || phase === 'vote'),
-    };
+  if (me && me.role) view.me = secretFor(me, phase);
+
+  // Le propriétaire reçoit aussi les secrets des joueurs qui jouent sur son écran (et d'eux seuls).
+  const myGuests = me ? guestsOf(room, me.id) : [];
+  if (myGuests.length > 0) {
+    view.guests = myGuests.map((guest) => ({
+      id: guest.id,
+      name: guest.name,
+      me: guest.role ? secretFor(guest, phase) : null,
+      myVote: phase === 'vote' ? g.votes[guest.id] || null : null,
+    }));
   }
 
   if (phase === 'discussion' || phase === 'vote') view.order = g.order;
@@ -580,6 +643,9 @@ module.exports = {
   planToRoles,
   createRoom,
   addPlayer,
+  addGuest,
+  removeGuest,
+  MAX_GUESTS_PER_PLAYER,
   removePlayer,
   kick,
   transferHost,

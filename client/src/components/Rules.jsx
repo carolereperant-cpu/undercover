@@ -58,6 +58,10 @@ export default function Rules({ onClose }) {
           De 4 à 12 joueurs. Mr White apparaît dès 5 joueurs, le Bouclier dès 6, le Détective dès 7. L’hôte peut
           désactiver ces rôles avant de lancer la partie.
         </p>
+        <p>
+          Pas de smartphone pour tout le monde ? Dans la salle d’attente, tu peux ajouter jusqu’à 3 joueurs qui jouent sur
+          ton écran : tu leur passes le téléphone à chaque étape.
+        </p>
       </div>
     </div>
   );

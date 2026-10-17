@@ -215,6 +215,30 @@ io.on('connection', (socket) => {
     done({ ok: true });
   });
 
+  /**
+   * Actions qu'un joueur peut aussi faire "pour" un joueur invité de son écran.
+   * Le navigateur envoie alors asId ; le serveur vérifie que cet invité appartient bien à l'expéditeur.
+   */
+  const actionAs = (event, fn) =>
+    on(event, (payload, done) => {
+      const c = contextOf(socket);
+      if (!c) return done({ ok: false, error: 'Tu n’es dans aucune salle.' });
+      let actor = c.player;
+      if (payload.asId !== undefined && payload.asId !== null) {
+        const guest = typeof payload.asId === 'string' ? game.getPlayer(c.room, payload.asId) : null;
+        if (!guest || guest.ownerId !== c.player.id) {
+          return done({ ok: false, error: 'Ce joueur n’est pas sur ton écran.' });
+        }
+        actor = guest;
+      }
+      const res = fn(c.room, actor, payload);
+      if (res.ok) broadcast(c.room);
+      done(res);
+    });
+
+  action('guest:add', (room, p, { name }) => game.addGuest(room, p.id, name));
+  action('guest:remove', (room, p, { guestId }) => game.removeGuest(room, p.id, guestId));
+
   action('host:options', (room, p, payload) => game.setOptions(room, p.id, payload));
   action('host:start', (room, p) => game.startGame(room, p.id));
   action('host:begin', (room, p) => game.beginDiscussion(room, p.id));
@@ -222,10 +246,10 @@ io.on('connection', (socket) => {
   action('host:closeVote', (room, p) => game.closeVote(room, p.id));
   action('host:next', (room, p) => game.nextRound(room, p.id));
   action('host:rematch', (room, p) => game.rematch(room, p.id));
-  action('player:ready', (room, p) => game.markReady(room, p.id));
-  action('player:vote', (room, p, { targetId }) => game.castVote(room, p.id, targetId));
-  action('detective:investigate', (room, p, { targetId }) => game.investigate(room, p.id, targetId));
-  action('white:guess', (room, p, { word }) => game.submitGuess(room, p.id, word));
+  actionAs('player:ready', (room, p) => game.markReady(room, p.id));
+  actionAs('player:vote', (room, p, { targetId }) => game.castVote(room, p.id, targetId));
+  actionAs('detective:investigate', (room, p, { targetId }) => game.investigate(room, p.id, targetId));
+  actionAs('white:guess', (room, p, { word }) => game.submitGuess(room, p.id, word));
 
   on('host:kick', ({ targetId }, done) => {
     const c = contextOf(socket);

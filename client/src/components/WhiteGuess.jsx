@@ -1,25 +1,31 @@
 import { useState } from 'react';
+import { buildSeats, withSeat } from '../seats.js';
 
 export default function WhiteGuess({ state, act }) {
-  const { result, guessFor, meId } = state;
+  const { result, guessFor } = state;
   const [word, setWord] = useState('');
   const [busy, setBusy] = useState(false);
-  const iGuess = guessFor === meId;
+
+  // Mr White peut être le joueur de cet écran, ou l'un de ses invités.
+  const guessSeat = buildSeats(state).find((s) => s.id === guessFor);
 
   const submit = async (e) => {
     e.preventDefault();
     if (!word.trim() || busy) return;
     setBusy(true);
-    await act('white:guess', { word });
+    await act('white:guess', withSeat(guessSeat, { word }));
     setBusy(false);
   };
 
-  if (iGuess) {
+  if (guessSeat) {
+    const forGuest = guessSeat.isGuest;
     return (
       <form className="stack" onSubmit={submit}>
-        <h1 className="display">Tu es démasqué, Mr White.</h1>
+        <h1 className="display">{forGuest ? `${guessSeat.name} est Mr White.` : 'Tu es démasqué, Mr White.'}</h1>
         <p className="lead">
-          Dernière chance : si tu devines le mot des civils, tu gagnes la partie à toi tout seul. Tu n’as qu’un essai.
+          {forGuest
+            ? `Passe l’écran à ${guessSeat.name}. Dernière chance : en devinant le mot des civils, la partie est gagnée en solo. Un seul essai.`
+            : 'Dernière chance : si tu devines le mot des civils, tu gagnes la partie à toi tout seul. Tu n’as qu’un essai.'}
         </p>
         <label className="field">
           <span>Le mot des civils</span>
@@ -43,7 +49,7 @@ export default function WhiteGuess({ state, act }) {
     <div className="stack">
       <h1 className="display">{result.playerName} était Mr White.</h1>
       <p className="lead">
-        Il lui reste un essai : s’il devine le mot des civils, il gagne seul. Silence, il réfléchit.
+        Dernier essai : si le mot des civils est deviné, Mr White gagne seul. Silence, ça réfléchit.
       </p>
       <p className="status">En attente de sa réponse…</p>
     </div>

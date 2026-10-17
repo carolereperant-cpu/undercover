@@ -328,3 +328,117 @@ test('simulation : 600 parties aléatoires de 4 à 12 joueurs se terminent toujo
     }
   }
 });
+
+// ---------------------------------------------------------------------------
+// Joueurs invités (jouent sur l'écran d'un autre joueur)
+// ---------------------------------------------------------------------------
+
+test('invités : ajout limité à 3 par joueur, prénom unique, salle pleine refusée', () => {
+  const room = makeRoom(2);
+  const owner = room.players[1];
+  assert.ok(g.addGuest(room, owner.id, 'Léo').ok);
+  assert.equal(g.addGuest(room, owner.id, 'léo').ok, false, 'prénom déjà pris');
+  assert.equal(g.addGuest(room, owner.id, '  ').ok, false);
+  assert.ok(g.addGuest(room, owner.id, 'Mia').ok);
+  assert.ok(g.addGuest(room, owner.id, 'Noé').ok);
+  assert.equal(g.addGuest(room, owner.id, 'Zoé').ok, false, 'trois invités maximum');
+  const guest = room.players.find((p) => p.name === 'Léo');
+  assert.equal(g.addGuest(room, guest.id, 'Petit').ok, false, 'un invité ne peut pas inviter');
+
+  const full = makeRoom(12);
+  assert.equal(g.addGuest(full, full.hostId, 'Trop').ok, false);
+});
+
+test('invités : retirer le propriétaire retire ses invités, et l’hôte n’est jamais un invité', () => {
+  const room = makeRoom(3);
+  const [host, p1] = room.players;
+  const guest = g.addGuest(room, p1.id, 'Léo').player;
+  assert.equal(g.removeGuest(room, host.id, guest.id).ok, false, 'seul le propriétaire retire son invité');
+  g.removePlayer(room, p1.id);
+  assert.ok(!room.players.some((p) => p.id === guest.id));
+
+  // transfert d'hôte : on saute les invités
+  const r2 = makeRoom(2);
+  const other = r2.players[1];
+  g.addGuest(r2, r2.hostId, 'Enfant');
+  g.removePlayer(r2, r2.hostId);
+  assert.equal(r2.hostId, other.id);
+});
+
+test('invités : le propriétaire reçoit leurs secrets, personne d’autre', () => {
+  const room = makeRoom(3);
+  const owner = room.players[1];
+  const guest = g.addGuest(room, owner.id, 'Léo').player;
+  g.addPlayer(room, 'Cinquième').player.connected = true;
+  g.startGame(room, room.hostId);
+  rig(room, [ROLE.CIVIL, ROLE.CIVIL, ROLE.CIVIL, ROLE.UNDERCOVER, ROLE.MRWHITE]);
+  // l'invité Léo est le 4e joueur (index 3) : il a le mot B (undercover)
+  assert.equal(room.players[3].id, guest.id);
+  const ownerView = g.viewFor(room, owner.id);
+  assert.equal(ownerView.guests.length, 1);
+  assert.equal(ownerView.guests[0].me.word, 'B');
+  assert.equal(ownerView.guests[0].me.role, ROLE.CIVIL, 'l’Undercover invité se croit civil');
+  for (const p of room.players.filter((x) => !x.ownerId && x.id !== owner.id)) {
+    const json = JSON.stringify(g.viewFor(room, p.id));
+    assert.ok(!json.includes('"guests"'), 'les autres ne voient pas les secrets des invités');
+    if (p.word !== 'B') assert.ok(!json.includes('"B"'));
+  }
+  const listed = ownerView.players.find((p) => p.id === guest.id);
+  assert.equal(listed.guest, true);
+  assert.equal(listed.ownerId, owner.id);
+});
+
+test('invités : un invité participe au vote et à la révélation, l’hôte ne l’est jamais', () => {
+  const room = makeRoom(4);
+  const owner = room.players[1];
+  const guest = g.addGuest(room, owner.id, 'Léo').player;
+  g.startGame(room, room.hostId);
+  rig(room, [ROLE.CIVIL, ROLE.CIVIL, ROLE.CIVIL, ROLE.UNDERCOVER, ROLE.CIVIL]);
+  assert.equal(room.players.length, 5);
+  assert.equal(room.players[4].id, guest.id);
+  for (const p of room.players.filter((x) => x.id !== guest.id)) g.markReady(room, p.id);
+  assert.equal(room.phase, 'reveal', 'tant que l’invité n’est pas prêt, on attend');
+  g.markReady(room, guest.id);
+  assert.equal(room.phase, 'discussion');
+  g.openVote(room, room.hostId);
+  const under = room.players[3];
+  voteAll(room, under.id);
+  assert.equal(room.phase, 'end');
+  assert.equal(room.game.winner, 'civils');
+});
+
+test('invités : un invité est hors ligne quand son propriétaire l’est', () => {
+  const room = makeRoom(3);
+  const owner = room.players[1];
+  const guest = g.addGuest(room, owner.id, 'Léo').player;
+  assert.equal(g.viewFor(room, room.hostId).players.find((p) => p.id === guest.id).connected, true);
+  owner.connected = false;
+  assert.equal(g.viewFor(room, room.hostId).players.find((p) => p.id === guest.id).connected, false);
+});
+
+test('simulation avec invités : 200 parties se terminent', () => {
+  for (let run = 0; run < 200; run++) {
+    const room = makeRoom(3 + (run % 6));
+    const owner = room.players[1];
+    g.addGuest(room, owner.id, 'Enfant1');
+    if (room.players.length < 12) g.addGuest(room, room.hostId, 'Enfant2');
+    if (room.players.length < 4) continue;
+    g.startGame(room, room.hostId);
+    g.beginDiscussion(room, room.hostId);
+    let guard = 0;
+    while (room.phase !== 'end') {
+      assert.ok(++guard < 200);
+      if (room.phase === 'discussion') g.openVote(room, room.hostId);
+      else if (room.phase === 'vote') {
+        const alive = room.players.filter((p) => p.alive);
+        for (const voter of alive) {
+          if (room.phase !== 'vote') break;
+          const pool = (room.game.candidates ? alive.filter((p) => room.game.candidates.includes(p.id)) : alive).filter((p) => p.id !== voter.id);
+          g.castVote(room, voter.id, pool[Math.floor(Math.random() * pool.length)].id);
+        }
+      } else if (room.phase === 'whiteGuess') g.submitGuess(room, room.game.guessFor, 'x');
+      else if (room.phase === 'result') g.nextRound(room, room.hostId);
+    }
+    assert.ok(['civils', 'infiltres', 'mrwhite'].includes(room.game.winner));
+  }
+});

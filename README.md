@@ -21,7 +21,13 @@ npm run dev:client      # terminal 2 : l'interface sur http://localhost:5173
 
 Vite affiche aussi une adresse du type `http://192.168.x.x:5173` : ouvre-la sur ton téléphone.
 
-Pour vérifier que tout fonctionne : `npm test` (25 tests).
+Pour vérifier que tout fonctionne : `npm test` (32 tests).
+
+## Inviter et jouer à plusieurs sur un seul écran
+
+- **QR code** : dans la salle d'attente, un QR code (avec bouton « Agrandir ») ouvre directement la salle sur le téléphone de la personne qui le scanne. Il est généré dans le navigateur : aucun service externe n'est utilisé. Le lien `/?salle=ABCD` pré-remplit aussi le code.
+- **Joueurs sur ton écran** : un enfant sans smartphone peut jouer avec le téléphone d'un adulte. Chaque joueur peut ajouter jusqu'à 3 invités dans la salle d'attente. Pendant la partie, un sélecteur permet de passer d'un joueur de l'écran à l'autre pour voir son mot, voter, enquêter ou deviner (Mr White). Les invités comptent dans les 12 joueurs maximum.
+- Côté sécurité : les secrets d'un invité ne sont envoyés qu'à son propriétaire. Le serveur vérifie à chaque action `asId` que l'invité appartient bien au téléphone qui agit.
 
 ## Les règles en bref
 
