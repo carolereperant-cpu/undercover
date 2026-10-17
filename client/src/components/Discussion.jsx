@@ -20,10 +20,18 @@ export default function Discussion({ state, act }) {
     <div className="stack">
       <h1 className="display">Manche {round}</h1>
       {state.theme && <p className="notice">Thème : {state.theme.emoji} {state.theme.label}</p>}
-      <p className="lead">
-        Chacun son tour, donne un indice sur ton mot : un mot ou une phrase courte, sans prononcer le mot lui-même. À
-        voix haute, tous ensemble.
-      </p>
+      {state.paper ? (
+        <p className="lead">
+          Mode dessin : prenez une feuille et un stylo. Chacun son tour, dans l’ordre ci-dessous, dessine ton mot sur la
+          même feuille (un trait ou un petit dessin, sans écrire de lettres), puis passe la feuille au suivant. Quand tout le monde
+          a dessiné, observez le résultat et discutez.
+        </p>
+      ) : (
+        <p className="lead">
+          Chacun son tour, donne un indice sur ton mot : un mot ou une phrase courte, sans prononcer le mot lui-même. À
+          voix haute, tous ensemble.
+        </p>
+      )}
 
       <section className="stack tight">
         <h2>Ordre de parole</h2>

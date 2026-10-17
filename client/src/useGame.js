@@ -89,9 +89,9 @@ export function useGame() {
   }, [notify]);
 
   const create = useCallback(
-    async (name) => {
+    async (name, gameType = 'undercover') => {
       saveName(name);
-      const res = await act('room:create', { name });
+      const res = await act('room:create', { name, gameType });
       if (res.ok) saveSession({ code: res.code, token: res.token });
       return res;
     },

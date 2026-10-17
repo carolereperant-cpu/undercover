@@ -9,6 +9,7 @@ import Result from './components/Result.jsx';
 import WhiteGuess from './components/WhiteGuess.jsx';
 import GameOver from './components/GameOver.jsx';
 import Rules from './components/Rules.jsx';
+import GameHost from './components/GameHost.jsx';
 
 export default function App() {
   const game = useGame();
@@ -16,7 +17,7 @@ export default function App() {
   const [showRules, setShowRules] = useState(false);
 
   // Chaque phase du jeu a sa couleur d'écran (voir styles.css, [data-phase]).
-  const phase = state ? state.phase : 'home';
+  const phase = state ? (state.gameType ? `mini-${state.phase}` : state.phase) : 'home';
 
   let screen;
   if (booting) {
@@ -25,7 +26,10 @@ export default function App() {
     screen = <Home create={create} join={join} notify={notify} />;
   } else {
     const props = { state, act, notify };
-    const screens = {
+    const isMini = Boolean(state.gameType);
+    const screens = isMini
+      ? { lobby: <Lobby {...props} />, playing: <GameHost {...props} leave={leave} />, end: <GameHost {...props} leave={leave} /> }
+      : {
       lobby: <Lobby {...props} />,
       reveal: <Reveal {...props} />,
       discussion: <Discussion {...props} />,
@@ -48,7 +52,7 @@ export default function App() {
   return (
     <div className="app" data-phase={phase}>
       <header className="topbar">
-        <span className="brand">Undercover</span>
+        <span className="brand">{state?.game ? `${state.game.emoji} ${state.game.label}` : 'Undercover'}</span>
         <div className="topbar-actions">
           {state && <span className="room-chip">Salle {state.code}</span>}
           <button type="button" className="icon-btn" onClick={() => setShowRules(true)} aria-label="Lire les règles">
@@ -75,7 +79,7 @@ export default function App() {
           {toast}
         </div>
       )}
-      {showRules && <Rules onClose={() => setShowRules(false)} />}
+      {showRules && <Rules game={state?.game} onClose={() => setShowRules(false)} />}
     </div>
   );
 }

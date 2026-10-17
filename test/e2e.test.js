@@ -233,3 +233,29 @@ test('thèmes : l’hôte choisit les thèmes, les autres les voient, et une par
   assert.equal(started.theme.label, 'Films');
   for (const c of clients) c.socket.close();
 });
+
+test('hub : la liste des jeux est servie, et un mini-jeu se joue en réseau (Puissance 4)', async () => {
+  const list = await (await fetch(`http://localhost:${port}/api/games`)).json();
+  assert.ok(list.length >= 9);
+  assert.equal(list[0].id, 'undercover');
+
+  const [a, b] = ['Ana', 'Ben'].map(makeClient);
+  await Promise.all([a.ready, b.ready]);
+  assert.equal((await a.emit('room:create', { name: 'Ana', gameType: 'nimportequoi' })).ok, false, 'jeu inconnu refusé');
+  const created = await a.emit('room:create', { name: 'Ana', gameType: 'puissance4' });
+  assert.ok(created.ok);
+  assert.ok((await b.emit('room:join', { code: created.code, name: 'Ben' })).ok);
+  const lobby = await a.waitFor((s) => s.players.length === 2);
+  assert.equal(lobby.gameType, 'puissance4');
+  assert.equal(lobby.limits.max, 2);
+  assert.equal((await a.emit('guest:add', { name: 'Léo' })).ok, false, 'pas d’invité à Puissance 4');
+  assert.ok((await a.emit('host:start')).ok);
+  const started = await a.waitFor((s) => s.phase === 'playing');
+  const first = started.mg.turn === started.mg.mine ? a : b;
+  const second = first === a ? b : a;
+  assert.equal((await second.emit('game:act', { type: 'drop', col: 0 })).ok, false, 'pas ton tour');
+  assert.ok((await first.emit('game:act', { type: 'drop', col: 3 })).ok);
+  const after = await second.waitFor((s) => s.mg && s.mg.board[5][3] !== null);
+  assert.equal(after.mg.turn, after.mg.mine, 'c’est maintenant au second joueur');
+  for (const c of [a, b]) c.socket.close();
+});

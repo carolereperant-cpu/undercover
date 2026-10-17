@@ -35,3 +35,18 @@ export function buildSeats(state) {
 
 /** Ajoute asId au contenu d'un événement quand le siège est un invité. */
 export const withSeat = (seat, payload = {}) => (seat.asId ? { ...payload, asId: seat.asId } : payload);
+
+/**
+ * Sièges pour les mini-jeux : soi-même et les invités de cet écran.
+ * Le serveur envoie la vue de chaque siège : state.mg pour soi, state.mgGuests[id] pour les invités.
+ */
+export function buildMgSeats(state) {
+  const mePlayer = state.players.find((p) => p.id === state.meId);
+  const seats = [{ id: state.meId, asId: undefined, name: mePlayer ? mePlayer.name : 'Moi', isGuest: false, mg: state.mg }];
+  for (const p of state.players) {
+    if (p.ownerId === state.meId && state.mgGuests?.[p.id]) {
+      seats.push({ id: p.id, asId: p.id, name: p.name, isGuest: true, mg: state.mgGuests[p.id] });
+    }
+  }
+  return seats;
+}

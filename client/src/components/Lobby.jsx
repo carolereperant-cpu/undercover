@@ -12,7 +12,8 @@ const PLAN_ORDER = ['civil', 'undercover', 'mrwhite', 'bouclier', 'detective'];
 const MAX_GUESTS = 3;
 
 export default function Lobby({ state, act, notify }) {
-  const { code, players, meId, hostId, options, plan, limits, themes } = state;
+  const { code, players, meId, hostId, options, plan, limits, themes, game: miniGame } = state;
+  const isMini = Boolean(miniGame); // un mini-jeu (pas Undercover)
   const isHost = meId === hostId;
   const count = players.length;
   const missing = limits.min - count;
@@ -46,9 +47,9 @@ export default function Lobby({ state, act, notify }) {
     if (res.ok) setGuestName('');
   };
 
-  const allThemes = themes.map((t) => t.id);
-  const selected = new Set(options.themes);
-  const allSelected = selected.size === themes.length;
+  const allThemes = isMini ? [] : themes.map((t) => t.id);
+  const selected = new Set(isMini ? [] : options.themes);
+  const allSelected = !isMini && selected.size === themes.length;
   const toggleTheme = (id) => {
     const next = selected.has(id) ? allThemes.filter((t) => t !== id && selected.has(t)) : allThemes.filter((t) => t === id || selected.has(t));
     if (next.length === 0) {
@@ -57,12 +58,25 @@ export default function Lobby({ state, act, notify }) {
     }
     act('host:options', { themes: next });
   };
-  const pairCount = themes.filter((t) => selected.has(t.id)).reduce((sum, t) => sum + t.count, 0);
+  const pairCount = isMini ? 0 : themes.filter((t) => selected.has(t.id)).reduce((sum, t) => sum + t.count, 0);
 
   const ownerName = (id) => players.find((p) => p.id === id)?.name ?? '';
 
   return (
     <div className="stack">
+      {isMini && (
+        <section className="stack tight">
+          <h1 className="display">
+            {miniGame.emoji} {miniGame.label}
+          </h1>
+          <p className="lead">{miniGame.tagline}</p>
+          <ol className="rules-short">
+            {miniGame.rules.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ol>
+        </section>
+      )}
       <section className="code-block">
         <p className="muted">Les autres joueurs entrent ce code, ou scannent le QR code</p>
         <p className="big-code" aria-label={`Code de la salle : ${code.split('').join(' ')}`}>
@@ -122,7 +136,7 @@ export default function Lobby({ state, act, notify }) {
         </ul>
       </section>
 
-      {myGuests.length < MAX_GUESTS && count < limits.max && (
+      {!state.noGuests && myGuests.length < MAX_GUESTS && count < limits.max && (
         <form className="panel" onSubmit={addGuest}>
           <h2>Quelqu’un joue sur ton écran ?</h2>
           <p className="muted">
@@ -145,6 +159,7 @@ export default function Lobby({ state, act, notify }) {
         </form>
       )}
 
+      {!isMini && (
       <section className="stack tight">
         <h2>Rôles pour {count} joueur{count > 1 ? 's' : ''}</h2>
         <ul className="plan">
@@ -158,7 +173,9 @@ export default function Lobby({ state, act, notify }) {
           ))}
         </ul>
       </section>
+      )}
 
+      {!isMini && (
       <section className="stack tight">
         <h2>Thèmes des mots</h2>
         {isHost ? (
@@ -206,9 +223,18 @@ export default function Lobby({ state, act, notify }) {
           </p>
         )}
       </section>
+      )}
 
-      {isHost && (
+      {!isMini && isHost && (
         <section className="stack tight">
+          <h2>Mode de jeu</h2>
+          <label className="switch">
+            <input type="checkbox" checked={options.paper} onChange={(e) => act('host:options', { paper: e.target.checked })} />
+            <span>
+              Mode dessin (papier et crayon)
+              <small>Au lieu de donner un indice à voix haute, chacun dessine son mot sur une feuille, les uns derrière les autres</small>
+            </span>
+          </label>
           <h2>Rôles spéciaux</h2>
           {OPTION_LABELS.map(({ key, label, hint }) => (
             <label key={key} className="switch">
@@ -229,7 +255,7 @@ export default function Lobby({ state, act, notify }) {
       {isHost ? (
         <>
           <button type="button" className="btn primary" disabled={missing > 0} onClick={() => act('host:start')}>
-            Lancer la partie
+            {isMini ? 'Lancer le jeu' : 'Lancer la partie'}
           </button>
           {missing > 0 && (
             <p className="muted center">

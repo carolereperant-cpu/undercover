@@ -10,6 +10,7 @@
 
 const crypto = require('node:crypto');
 const { THEMES, THEME_IDS } = require('./words');
+const { MINI, metaOf } = require('./minigames');
 
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 12;
@@ -24,8 +25,7 @@ const ROLE = Object.freeze({
   DETECTIVE: 'detective',
 });
 
-const ok = (extra = {}) => ({ ok: true, ...extra });
-const err = (error) => ({ ok: false, error });
+const { ok, err, shuffle, cleanText, sameWord, wordKey } = require('./common');
 
 /** Le camp d'un rôle : les infiltrés (Undercover, Mr White) contre les civils (tous les autres). */
 const campOf = (role) => (role === ROLE.UNDERCOVER || role === ROLE.MRWHITE ? 'infiltres' : 'civils');
@@ -33,52 +33,6 @@ const campOf = (role) => (role === ROLE.UNDERCOVER || role === ROLE.MRWHITE ? 'i
 // ---------------------------------------------------------------------------
 // Petits outils
 // ---------------------------------------------------------------------------
-
-/** Mélange de Fisher-Yates avec un vrai générateur aléatoire (crypto), pas Math.random. */
-function shuffle(list) {
-  const a = [...list];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = crypto.randomInt(i + 1);
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-// Caractères de contrôle et caractères invisibles (zéro-largeur, séparateurs de ligne…) à supprimer.
-const INVISIBLE_CHARS = new RegExp('[\\u0000-\\u001f\\u007f\\u200b-\\u200f\\u2028-\\u202f\\ufeff]', 'g');
-
-/** Nettoie un texte saisi par un joueur : caractères invisibles, espaces multiples, longueur. */
-function cleanText(value, max) {
-  return String(value ?? '')
-    .replace(INVISIBLE_CHARS, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, max);
-}
-
-/** Clé de comparaison : sans accents, sans majuscules, sans article, sans espaces ni tirets. */
-function wordKey(value) {
-  let t = String(value ?? '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/œ/g, 'oe')
-    .replace(/æ/g, 'ae')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-  t = t.replace(/^(le|la|les|l|un|une|des|du|de la|de l|d) /, '');
-  return t.replace(/ /g, '');
-}
-
-const stripPlural = (k) => (k.length > 3 ? k.replace(/[sx]$/, '') : k);
-
-/** Deux mots sont considérés identiques à l'accent, à l'article et au pluriel près. */
-function sameWord(a, b) {
-  const ka = wordKey(a);
-  const kb = wordKey(b);
-  if (!ka || !kb) return false;
-  return ka === kb || stripPlural(ka) === stripPlural(kb);
-}
 
 // ---------------------------------------------------------------------------
 // Répartition des rôles
@@ -159,7 +113,9 @@ function findByToken(room, token) {
   return room.players.find((p) => p.token === token) || null;
 }
 
-function createRoom(isTaken, hostName) {
+function createRoom(isTaken, hostName, gameType = 'undercover') {
+  const meta = metaOf(gameType);
+  if (!meta) return err('Jeu inconnu.');
   const name = cleanText(hostName, NAME_MAX);
   if (!name) return err('Choisis un pseudo.');
   const code = generateCode(isTaken);
@@ -172,7 +128,12 @@ function createRoom(isTaken, hostName) {
     phase: 'lobby',
     hostId: host.id,
     players: [host],
-    options: { mrwhite: true, shield: true, detective: true, showTheme: false, themes: [...THEME_IDS] },
+    gameType,
+    minPlayers: meta.min,
+    maxPlayers: meta.max,
+    noGuests: Boolean(meta.noGuests),
+    mg: null, // l'état d'un mini-jeu (voir server/minigames/)
+    options: { mrwhite: true, shield: true, detective: true, showTheme: false, paper: false, themes: [...THEME_IDS] },
     usedPairs: new Set(),
     game: null,
   };
@@ -181,7 +142,7 @@ function createRoom(isTaken, hostName) {
 
 function addPlayer(room, rawName) {
   if (room.phase !== 'lobby') return err('La partie a déjà commencé.');
-  if (room.players.length >= MAX_PLAYERS) return err(`La salle est pleine (${MAX_PLAYERS} joueurs maximum).`);
+  if (room.players.length >= room.maxPlayers) return err(`La salle est pleine (${room.maxPlayers} joueurs maximum).`);
   const name = cleanText(rawName, NAME_MAX);
   if (!name) return err('Choisis un pseudo.');
   if (room.players.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
@@ -200,12 +161,13 @@ const MAX_GUESTS_PER_PLAYER = 3;
  */
 function addGuest(room, ownerId, rawName) {
   if (room.phase !== 'lobby') return err('La partie a déjà commencé.');
+  if (room.noGuests) return err('Ce jeu se joue à deux, chacun sur son téléphone.');
   const owner = getPlayer(room, ownerId);
   if (!owner || owner.ownerId) return err('Joueur introuvable.');
   if (guestsOf(room, ownerId).length >= MAX_GUESTS_PER_PLAYER) {
     return err(`Tu peux faire jouer ${MAX_GUESTS_PER_PLAYER} personnes sur ton écran au maximum.`);
   }
-  if (room.players.length >= MAX_PLAYERS) return err(`La salle est pleine (${MAX_PLAYERS} joueurs maximum).`);
+  if (room.players.length >= room.maxPlayers) return err(`La salle est pleine (${room.maxPlayers} joueurs maximum).`);
   const name = cleanText(rawName, NAME_MAX);
   if (!name) return err('Choisis un prénom.');
   if (room.players.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
@@ -268,7 +230,7 @@ function setOptions(room, actorId, patch) {
     themes = THEME_IDS.filter((id) => patch.themes.includes(id)); // ignore les ids inconnus, garde l'ordre officiel
     if (themes.length === 0) return err('Choisis au moins un thème.');
   }
-  for (const key of ['mrwhite', 'shield', 'detective', 'showTheme']) {
+  for (const key of ['mrwhite', 'shield', 'detective', 'showTheme', 'paper']) {
     if (typeof patch?.[key] === 'boolean') room.options[key] = patch[key];
   }
   if (themes) room.options.themes = themes;
@@ -300,8 +262,13 @@ function startGame(room, actorId) {
   if (room.hostId !== actorId) return err('Seul l’hôte peut lancer la partie.');
   if (room.phase !== 'lobby') return err('La partie est déjà lancée.');
   const n = room.players.length;
-  if (n < MIN_PLAYERS) return err(`Il faut au moins ${MIN_PLAYERS} joueurs pour commencer.`);
-  if (n > MAX_PLAYERS) return err(`${MAX_PLAYERS} joueurs maximum.`);
+  if (n < room.minPlayers) return err(`Il faut au moins ${room.minPlayers} joueurs pour commencer.`);
+  if (n > room.maxPlayers) return err(`${room.maxPlayers} joueurs maximum.`);
+  if (room.gameType !== 'undercover') {
+    MINI[room.gameType].init(room);
+    room.phase = 'playing';
+    return ok();
+  }
 
   const { civilWord, undercoverWord, theme } = choosePair(room);
   const roles = shuffle(planToRoles(rolePlan(n, room.options)));
@@ -520,9 +487,17 @@ function investigate(room, playerId, targetId) {
   return ok();
 }
 
+/** Une action de mini-jeu (voir server/minigames/). L'acteur est un joueur ou un invité de l'expéditeur. */
+function miniAct(room, actor, payload) {
+  if (room.gameType === 'undercover') return err('Action inconnue.');
+  const type = typeof payload?.type === 'string' ? payload.type : '';
+  return MINI[room.gameType].act(room, actor, type, payload);
+}
+
 function rematch(room, actorId) {
   if (room.hostId !== actorId) return err('Seul l’hôte peut relancer une partie.');
   if (room.phase !== 'end') return err('La partie n’est pas terminée.');
+  if (room.gameType !== 'undercover') room.mg = null;
   room.players = room.players.filter((p) => isOnline(room, p) || p.id === room.hostId);
   if (!getPlayer(room, room.hostId)?.connected) transferHost(room);
   for (const p of room.players) {
@@ -578,7 +553,8 @@ function viewFor(room, playerId) {
     round: g ? g.round : 0,
     hostId: room.hostId,
     meId: playerId,
-    limits: { min: MIN_PLAYERS, max: MAX_PLAYERS },
+    paper: Boolean(room.options.paper),
+    limits: { min: room.minPlayers, max: room.maxPlayers },
     players: room.players.map((p) => ({
       id: p.id,
       name: p.name,
@@ -592,6 +568,23 @@ function viewFor(room, playerId) {
       voted: phase === 'vote' && Boolean(g.votes[p.id]),
     })),
   };
+
+  if (room.gameType !== 'undercover') {
+    view.gameType = room.gameType;
+    view.game = metaOf(room.gameType);
+    view.noGuests = room.noGuests;
+  }
+
+  // Mini-jeux : chacun reçoit sa propre vue, et le propriétaire reçoit aussi celle de ses invités.
+  if (room.gameType !== 'undercover') {
+    if (phase !== 'lobby') {
+      const mod = MINI[room.gameType];
+      view.mg = mod.view(room, playerId);
+      const mine = guestsOf(room, playerId);
+      if (mine.length > 0) view.mgGuests = Object.fromEntries(mine.map((guest) => [guest.id, mod.view(room, guest.id)]));
+    }
+    return view;
+  }
 
   if (phase === 'lobby') {
     view.options = { ...room.options, themes: [...room.options.themes] };
@@ -664,6 +657,7 @@ module.exports = {
   rolePlan,
   planToRoles,
   createRoom,
+  miniAct,
   addPlayer,
   addGuest,
   removeGuest,

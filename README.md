@@ -1,6 +1,6 @@
 # Undercover
 
-Jeu de déduction en ligne pour 3 à 12 joueurs. Chacun joue sur son propre smartphone : une personne crée une salle, les autres entrent le code (ou ouvrent le lien partagé), et la partie se déroule en temps réel. Gratuit, sans compte, sans base de données.
+Plateforme de jeux de société en ligne (Undercover et 8 autres jeux, de 2 à 13 joueurs). Chacun joue sur son propre smartphone : une personne crée une salle, les autres entrent le code (ou ouvrent le lien partagé), et la partie se déroule en temps réel. Gratuit, sans compte, sans base de données.
 
 ## Lancer le jeu sur ton ordinateur
 
@@ -21,8 +21,29 @@ npm run dev:client      # terminal 2 : l'interface sur http://localhost:5173
 
 Vite affiche aussi une adresse du type `http://192.168.x.x:5173` : ouvre-la sur ton téléphone.
 
-Pour vérifier que tout fonctionne : `npm test` (37 tests).
+Pour vérifier que tout fonctionne : `npm test` (64 tests).
 
+
+
+## Plusieurs jeux sur un même site
+
+L'accueil propose un menu de jeux, filtrable par nombre de joueurs et par durée. Tous partagent les mêmes salles (code, QR code, joueurs invités sur l'écran d'un autre joueur).
+
+| Jeu | Joueurs | Durée |
+|---|---|---|
+| Undercover (avec thèmes, rôles et mode dessin papier-crayon) | 3 à 12 | 10 à 20 min |
+| Qui est le plus susceptible de… | 3 à 13 | 10 min |
+| L'intrus (type Spyfall) | 3 à 13 | 8 à 10 min |
+| Télépathie | 2 à 8 | 5 à 10 min |
+| 20 questions | 2 à 6 | 5 à 10 min |
+| Le Dictionnaire | 3 à 13 | 15 min |
+| Puissance 4 | 2 | 5 min |
+| Bataille navale | 2 | 10 à 15 min |
+| Dés menteurs | 2 à 6 | 10 à 15 min |
+
+**Ajouter un jeu** : créer `server/minigames/monjeu.js` (fiche `meta`, `init`, `act`, `view`), le déclarer dans `server/minigames/index.js`, puis ajouter son écran dans `client/src/games/` et une ligne dans `client/src/components/GameHost.jsx`. La règle d'or reste la même : `view(room, playerId)` ne renvoie que ce que ce joueur a le droit de voir (ses dés, son mot, jamais ceux des autres).
+
+**Mode dessin d'Undercover** : option de la salle d'attente. L'appli donne toujours les mots et les rôles, mais au lieu de donner un indice à voix haute, chacun dessine son mot sur une feuille réelle, les uns derrière les autres.
 
 ## Thèmes de mots
 

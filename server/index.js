@@ -13,6 +13,7 @@ const express = require('express');
 const helmet = require('helmet');
 const { Server } = require('socket.io');
 const game = require('./game');
+const { GAMES } = require('./minigames');
 
 const PORT = Number(process.env.PORT) || 3001;
 const CLIENT_DIST = path.join(__dirname, '..', 'client', 'dist');
@@ -52,6 +53,8 @@ app.use(
 );
 
 app.get('/health', (_req, res) => res.json({ ok: true, rooms: rooms.size }));
+// La liste des jeux (nom, joueurs, durée) : le menu d'accueil la lit au chargement.
+app.get('/api/games', (_req, res) => res.json(GAMES));
 
 if (fs.existsSync(CLIENT_DIST)) {
   app.use(express.static(CLIENT_DIST, { maxAge: '1h', index: false }));
@@ -166,10 +169,10 @@ io.on('connection', (socket) => {
       done(res);
     });
 
-  on('room:create', ({ name }, done) => {
+  on('room:create', ({ name, gameType }, done) => {
     if (contextOf(socket)) return done({ ok: false, error: 'Tu es déjà dans une salle.' });
     if (rooms.size >= MAX_ROOMS) return done({ ok: false, error: 'Le serveur est plein, réessaie plus tard.' });
-    const res = game.createRoom((code) => rooms.has(code), name);
+    const res = game.createRoom((code) => rooms.has(code), name, typeof gameType === 'string' ? gameType : 'undercover');
     if (!res.ok) return done(res);
     rooms.set(res.room.code, res.room);
     attach(socket, res.room, res.player);
@@ -239,6 +242,7 @@ io.on('connection', (socket) => {
   action('guest:add', (room, p, { name }) => game.addGuest(room, p.id, name));
   action('guest:remove', (room, p, { guestId }) => game.removeGuest(room, p.id, guestId));
 
+  actionAs('game:act', (room, p, payload) => game.miniAct(room, p, payload));
   action('host:options', (room, p, payload) => game.setOptions(room, p.id, payload));
   action('host:start', (room, p) => game.startGame(room, p.id));
   action('host:begin', (room, p) => game.beginDiscussion(room, p.id));

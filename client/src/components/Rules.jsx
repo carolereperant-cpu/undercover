@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { ROLE_INFO } from '../roles.js';
 
-export default function Rules({ onClose }) {
+export default function Rules({ onClose, game }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
@@ -18,6 +18,25 @@ export default function Rules({ onClose }) {
           </button>
         </div>
 
+        {game && game.rules.length > 0 && (
+          <>
+            <h3>
+              {game.emoji} {game.label}
+            </h3>
+            <p>{game.tagline}</p>
+            <ol>
+              {game.rules.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ol>
+            <p>
+              De {game.min} à {game.max} joueurs, environ {game.minutes} minutes.
+              {!game.noGuests && ' Pas de smartphone pour tout le monde ? Tu peux faire jouer des personnes sur ton écran depuis la salle d’attente.'}
+            </p>
+          </>
+        )}
+        {(!game || game.rules.length === 0) && (
+          <>
         <h3>Le principe</h3>
         <p>
           Chaque joueur reçoit un mot secret. Les civils ont tous le même mot. Les undercovers ont un mot très proche, sans
@@ -62,6 +81,8 @@ export default function Rules({ onClose }) {
           Pas de smartphone pour tout le monde ? Dans la salle d’attente, tu peux ajouter jusqu’à 3 joueurs qui jouent sur
           ton écran : tu leur passes le téléphone à chaque étape.
         </p>
+          </>
+        )}
       </div>
     </div>
   );
