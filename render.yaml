@@ -1,0 +1,13 @@
+# Blueprint Render : permet de déployer en un clic depuis un dépôt GitHub.
+# Render lit ce fichier et crée le service tout seul.
+services:
+  - type: web
+    name: undercover
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22

@@ -1,0 +1,26 @@
+{
+  "name": "undercover",
+  "version": "1.0.0",
+  "description": "Undercover : jeu de déduction en ligne, jouable sur les smartphones de tous les joueurs",
+  "private": true,
+  "main": "server/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "install:all": "npm install && npm --prefix client install",
+    "build": "npm --prefix client install --include=dev && npm --prefix client run build",
+    "start": "node server/index.js",
+    "dev:server": "node --watch server/index.js",
+    "dev:client": "npm --prefix client run dev",
+    "test": "node --test test/*.test.js server/*.test.js"
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "helmet": "^8.3.0",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.4"
+  }
+}
