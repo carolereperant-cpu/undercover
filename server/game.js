@@ -9,7 +9,7 @@
  */
 
 const crypto = require('node:crypto');
-const { PAIRS } = require('./words');
+const { THEMES, THEME_IDS } = require('./words');
 
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 12;
@@ -172,7 +172,7 @@ function createRoom(isTaken, hostName) {
     phase: 'lobby',
     hostId: host.id,
     players: [host],
-    options: { mrwhite: true, shield: true, detective: true },
+    options: { mrwhite: true, shield: true, detective: true, showTheme: false, themes: [...THEME_IDS] },
     usedPairs: new Set(),
     game: null,
   };
@@ -261,9 +261,17 @@ function setConnection(room, playerId, connected, socketId = null) {
 function setOptions(room, actorId, patch) {
   if (room.hostId !== actorId) return err('Seul l’hôte peut changer les options.');
   if (room.phase !== 'lobby') return err('Les options ne se changent qu’avant la partie.');
-  for (const key of ['mrwhite', 'shield', 'detective']) {
+  // On valide les thèmes avant de modifier quoi que ce soit : tout ou rien.
+  let themes = null;
+  if (patch && 'themes' in patch) {
+    if (!Array.isArray(patch.themes)) return err('Thèmes invalides.');
+    themes = THEME_IDS.filter((id) => patch.themes.includes(id)); // ignore les ids inconnus, garde l'ordre officiel
+    if (themes.length === 0) return err('Choisis au moins un thème.');
+  }
+  for (const key of ['mrwhite', 'shield', 'detective', 'showTheme']) {
     if (typeof patch?.[key] === 'boolean') room.options[key] = patch[key];
   }
+  if (themes) room.options.themes = themes;
   return ok();
 }
 
@@ -272,14 +280,20 @@ function setOptions(room, actorId, patch) {
 // ---------------------------------------------------------------------------
 
 function choosePair(room) {
-  if (room.usedPairs.size >= PAIRS.length) room.usedPairs.clear();
-  let index;
-  do {
-    index = crypto.randomInt(PAIRS.length);
-  } while (room.usedPairs.has(index));
-  room.usedPairs.add(index);
-  const [a, b] = PAIRS[index];
-  return crypto.randomInt(2) === 0 ? { civilWord: a, undercoverWord: b } : { civilWord: b, undercoverWord: a };
+  // Toutes les paires des thèmes cochés, chacune repérée par une clé "thème:numéro".
+  const chosen = THEMES.filter((t) => room.options.themes.includes(t.id));
+  const pool = chosen.flatMap((t) => t.pairs.map((pair, index) => ({ theme: t, pair, key: `${t.id}:${index}` })));
+  let fresh = pool.filter((entry) => !room.usedPairs.has(entry.key));
+  if (fresh.length === 0) {
+    // Tout a été joué dans ces thèmes : on repart de zéro pour eux (sans toucher aux autres).
+    pool.forEach((entry) => room.usedPairs.delete(entry.key));
+    fresh = pool;
+  }
+  const entry = fresh[crypto.randomInt(fresh.length)];
+  room.usedPairs.add(entry.key);
+  const [a, b] = entry.pair;
+  const words = crypto.randomInt(2) === 0 ? { civilWord: a, undercoverWord: b } : { civilWord: b, undercoverWord: a };
+  return { ...words, theme: entry.theme.id };
 }
 
 function startGame(room, actorId) {
@@ -289,7 +303,7 @@ function startGame(room, actorId) {
   if (n < MIN_PLAYERS) return err(`Il faut au moins ${MIN_PLAYERS} joueurs pour commencer.`);
   if (n > MAX_PLAYERS) return err(`${MAX_PLAYERS} joueurs maximum.`);
 
-  const { civilWord, undercoverWord } = choosePair(room);
+  const { civilWord, undercoverWord, theme } = choosePair(room);
   const roles = shuffle(planToRoles(rolePlan(n, room.options)));
   room.players.forEach((p, i) => {
     p.role = roles[i];
@@ -304,6 +318,7 @@ function startGame(room, actorId) {
     round: 1,
     civilWord,
     undercoverWord,
+    theme,
     order: [],
     votes: {},
     candidates: null,
@@ -579,9 +594,16 @@ function viewFor(room, playerId) {
   };
 
   if (phase === 'lobby') {
-    view.options = { ...room.options };
+    view.options = { ...room.options, themes: [...room.options.themes] };
+    view.themes = THEMES.map((t) => ({ id: t.id, label: t.label, emoji: t.emoji, count: t.pairs.length }));
     view.plan = rolePlan(room.players.length, room.options);
     return view;
+  }
+
+  // Le thème n'est montré que si l'hôte l'a choisi (sinon Mr White aurait un indice gratuit).
+  if (room.options.showTheme && g) {
+    const t = THEMES.find((x) => x.id === g.theme);
+    if (t) view.theme = { label: t.label, emoji: t.emoji };
   }
 
   if (me && me.role) view.me = secretFor(me, phase);

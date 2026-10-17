@@ -12,7 +12,7 @@ const PLAN_ORDER = ['civil', 'undercover', 'mrwhite', 'bouclier', 'detective'];
 const MAX_GUESTS = 3;
 
 export default function Lobby({ state, act, notify }) {
-  const { code, players, meId, hostId, options, plan, limits } = state;
+  const { code, players, meId, hostId, options, plan, limits, themes } = state;
   const isHost = meId === hostId;
   const count = players.length;
   const missing = limits.min - count;
@@ -45,6 +45,19 @@ export default function Lobby({ state, act, notify }) {
     const res = await act('guest:add', { name });
     if (res.ok) setGuestName('');
   };
+
+  const allThemes = themes.map((t) => t.id);
+  const selected = new Set(options.themes);
+  const allSelected = selected.size === themes.length;
+  const toggleTheme = (id) => {
+    const next = selected.has(id) ? allThemes.filter((t) => t !== id && selected.has(t)) : allThemes.filter((t) => t === id || selected.has(t));
+    if (next.length === 0) {
+      notify('Garde au moins un thème.');
+      return;
+    }
+    act('host:options', { themes: next });
+  };
+  const pairCount = themes.filter((t) => selected.has(t.id)).reduce((sum, t) => sum + t.count, 0);
 
   const ownerName = (id) => players.find((p) => p.id === id)?.name ?? '';
 
@@ -144,6 +157,54 @@ export default function Lobby({ state, act, notify }) {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="stack tight">
+        <h2>Thèmes des mots</h2>
+        {isHost ? (
+          <>
+            <ul className="chips">
+              {themes.map((t) => (
+                <li key={t.id}>
+                  <button
+                    type="button"
+                    className={`chip ${selected.has(t.id) ? 'on' : ''}`}
+                    aria-pressed={selected.has(t.id)}
+                    onClick={() => toggleTheme(t.id)}
+                  >
+                    {t.emoji} {t.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              className="btn secondary"
+              disabled={allSelected}
+              onClick={() => act('host:options', { themes: allThemes })}
+            >
+              Tout mélanger
+            </button>
+            <p className="muted">{pairCount} paires de mots possibles avec ta sélection.</p>
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={options.showTheme}
+                onChange={(e) => act('host:options', { showTheme: e.target.checked })}
+              />
+              <span>
+                Afficher le thème pendant la partie
+                <small>Plus facile pour Mr White, qui connaît alors la catégorie</small>
+              </span>
+            </label>
+          </>
+        ) : (
+          <p className="muted">
+            {allSelected
+              ? 'Tous les thèmes sont mélangés.'
+              : themes.filter((t) => selected.has(t.id)).map((t) => `${t.emoji} ${t.label}`).join(' · ')}
+          </p>
+        )}
       </section>
 
       {isHost && (

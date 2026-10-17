@@ -207,3 +207,29 @@ test('joueur invité : le propriétaire agit pour lui, les autres non', async ()
 
   for (const c of clients) c.socket.close();
 });
+
+test('thèmes : l’hôte choisit les thèmes, les autres les voient, et une partie à 3 démarre', async () => {
+  const clients = ['Hôte', 'Ami1', 'Ami2'].map(makeClient);
+  await Promise.all(clients.map((c) => c.ready));
+  const created = await clients[0].emit('room:create', { name: 'Hôte' });
+  assert.ok(created.ok);
+  for (const c of clients.slice(1)) assert.ok((await c.emit('room:join', { code: created.code, name: c.name })).ok);
+  const [host, a1] = clients;
+
+  const lobby = await host.waitFor((s) => s.players.length === 3);
+  assert.ok(lobby.themes.length >= 9);
+  assert.equal(lobby.options.themes.length, lobby.themes.length);
+
+  // Un joueur ordinaire ne peut pas changer les thèmes ; l'hôte oui, mais pas une liste vide.
+  assert.equal((await a1.emit('host:options', { themes: ['films'] })).ok, false);
+  assert.equal((await host.emit('host:options', { themes: [] })).ok, false);
+  assert.ok((await host.emit('host:options', { themes: ['films'], showTheme: true })).ok);
+  const seen = await a1.waitFor((s) => s.options && s.options.themes.length === 1);
+  assert.deepEqual(seen.options.themes, ['films']);
+
+  // À 3 joueurs, la partie démarre et le thème est visible par tous.
+  assert.ok((await host.emit('host:start')).ok);
+  const started = await a1.waitFor((s) => s.phase === 'reveal');
+  assert.equal(started.theme.label, 'Films');
+  for (const c of clients) c.socket.close();
+});

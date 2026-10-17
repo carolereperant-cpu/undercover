@@ -21,7 +21,12 @@ npm run dev:client      # terminal 2 : l'interface sur http://localhost:5173
 
 Vite affiche aussi une adresse du type `http://192.168.x.x:5173` : ouvre-la sur ton téléphone.
 
-Pour vérifier que tout fonctionne : `npm test` (32 tests).
+Pour vérifier que tout fonctionne : `npm test` (37 tests).
+
+
+## Thèmes de mots
+
+9 thèmes (Classique, Années 80, Années 90, Millénials, Gen Z, Films, Séries, Musique, Enfants), soit 291 paires de mots proches. Chaque paire se joue dans les deux sens (quel mot va aux civils ?), donc 582 combinaisons. L'hôte coche les thèmes dans la salle d'attente (« Tout mélanger » par défaut) et peut afficher le thème pendant la partie. Les mots sont dans `server/words.js` : pour ajouter un thème, ajoute un tableau de paires et une ligne dans `THEMES`.
 
 ## Inviter et jouer à plusieurs sur un seul écran
 
@@ -66,7 +71,7 @@ Répartition automatique : 3 ou 4 joueurs = Civils + 1 Undercover. Mr White dès
 |---|---|
 | **Socket.IO** plutôt que des requêtes HTTP classiques | Le serveur doit pouvoir prévenir tous les téléphones lui-même (quelqu'un a voté, le vote est ouvert). Avec du HTTP classique, chaque téléphone devrait demander sans cesse « du nouveau ? » (polling). Les WebSockets gardent un canal ouvert dans les deux sens. Socket.IO ajoute la reconnexion automatique et un repli en polling si les WebSockets sont bloqués. |
 | **Pas de base de données** | Une partie dure quelques minutes et n'a aucune valeur après. Tout vit dans la mémoire du serveur (`Map` des salles) : plus simple, plus rapide, gratuit. Le ménage des salles abandonnées est automatique. |
-| **Logique du jeu isolée** (`server/game.js`) | Ce fichier ne connaît ni Express ni Socket.IO : il se teste seul (21 tests, dont 600 parties simulées). La couche réseau (`server/index.js`) ne fait que recevoir, appeler la logique, puis rediffuser. |
+| **Logique du jeu isolée** (`server/game.js`) | Ce fichier ne connaît ni Express ni Socket.IO : il se teste seul (tests unitaires et 650 parties simulées). La couche réseau (`server/index.js`) ne fait que recevoir, appeler la logique, puis rediffuser. |
 | **Le serveur filtre ce que chaque joueur voit** (`viewFor`) | Ne jamais faire confiance au navigateur : si on envoyait tous les mots à tous les téléphones en les cachant à l'affichage, il suffirait d'ouvrir la console pour tricher. Chaque joueur ne reçoit que son mot. L'Undercover reçoit même le rôle « civil », puisqu'il ne sait pas qu'il est undercover. |
 | **Jeton secret de reconnexion** | L'identifiant d'un joueur est public (il sert à voter). Se reconnecter demande un jeton aléatoire que seul son téléphone connaît, sinon n'importe qui pourrait usurper un joueur. Le jeton est gardé dans `localStorage`, donc un téléphone qui se met en veille retrouve sa place. |
 | **Aléatoire cryptographique** (`crypto.randomInt`) | `Math.random` est prévisible. Pour distribuer les rôles équitablement, on utilise le générateur sécurisé de Node. |

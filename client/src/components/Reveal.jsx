@@ -26,6 +26,7 @@ export default function Reveal({ state, act }) {
   return (
     <div className="stack">
       <h1 className="display">{shared ? `Au tour de ${seat.name}.` : 'Découvre ton mot, en secret.'}</h1>
+      {state.theme && <p className="notice">Thème : {state.theme.emoji} {state.theme.label}</p>}
       <p className="lead">
         {shared
           ? `Passe l’écran à ${seat.name}, qui maintient la carte appuyée pour voir son mot. Les autres ne regardent pas.`

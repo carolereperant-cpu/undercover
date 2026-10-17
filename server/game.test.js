@@ -442,3 +442,69 @@ test('simulation avec invités : 200 parties se terminent', () => {
     assert.ok(['civils', 'infiltres', 'mrwhite'].includes(room.game.winner));
   }
 });
+
+// ---------------------------------------------------------------------------
+// Thèmes de mots
+// ---------------------------------------------------------------------------
+
+test('thèmes : chaque thème a au moins 15 paires, sans doublon ni mot identique', () => {
+  const { THEMES } = require('./words');
+  const seen = new Set();
+  for (const t of THEMES) {
+    assert.ok(t.pairs.length >= 15, `${t.id} : ${t.pairs.length} paires`);
+    for (const [a, b] of t.pairs) {
+      assert.notEqual(a.toLowerCase(), b.toLowerCase());
+      const key = [a, b].map((w) => w.toLowerCase()).sort().join('|');
+      assert.ok(!seen.has(key), `doublon : ${key}`);
+      seen.add(key);
+    }
+  }
+});
+
+test('thèmes : options valides, au moins un thème, tout ou rien', () => {
+  const room = makeRoom(4);
+  const before = [...room.options.themes];
+  assert.ok(before.length >= 9, 'tous les thèmes sont cochés par défaut');
+  assert.equal(g.setOptions(room, room.players[1].id, { themes: ['films'] }).ok, false, 'réservé à l’hôte');
+  assert.equal(g.setOptions(room, room.hostId, { themes: [] }).ok, false, 'au moins un thème');
+  assert.equal(g.setOptions(room, room.hostId, { themes: 'films' }).ok, false, 'tableau obligatoire');
+  assert.equal(g.setOptions(room, room.hostId, { themes: ['nimportequoi'] }).ok, false, 'thèmes inconnus seuls');
+  // Un refus ne doit rien changer, même aux autres options envoyées en même temps.
+  assert.equal(g.setOptions(room, room.hostId, { themes: [], mrwhite: false }).ok, false);
+  assert.equal(room.options.mrwhite, true);
+  assert.deepEqual(room.options.themes, before);
+  assert.ok(g.setOptions(room, room.hostId, { themes: ['films', 'inconnu', 'genz'] }).ok);
+  assert.deepEqual(room.options.themes, ['genz', 'films']);
+});
+
+test('thèmes : la paire tirée vient toujours d’un thème coché, sans répétition avant épuisement', () => {
+  const { THEMES } = require('./words');
+  const room = makeRoom(4);
+  g.setOptions(room, room.hostId, { themes: ['musique'] });
+  const musique = THEMES.find((t) => t.id === 'musique');
+  const words = new Set(musique.pairs.flat());
+  const seen = new Set();
+  for (let i = 0; i < musique.pairs.length; i++) {
+    g.startGame(room, room.hostId);
+    assert.equal(room.game.theme, 'musique');
+    assert.ok(words.has(room.game.civilWord) && words.has(room.game.undercoverWord));
+    const key = [room.game.civilWord, room.game.undercoverWord].sort().join('|');
+    assert.ok(!seen.has(key), `paire répétée : ${key}`);
+    seen.add(key);
+    room.phase = 'lobby'; // on relance une partie dans la même salle
+  }
+  // Après épuisement, le tirage repart sans planter.
+  assert.ok(g.startGame(room, room.hostId).ok);
+});
+
+test('thèmes : le thème n’est visible que si l’hôte l’a demandé', () => {
+  const room = makeRoom(4);
+  g.setOptions(room, room.hostId, { themes: ['series'] });
+  g.startGame(room, room.hostId);
+  assert.equal(g.viewFor(room, room.hostId).theme, undefined);
+  room.phase = 'lobby';
+  g.setOptions(room, room.hostId, { showTheme: true });
+  g.startGame(room, room.hostId);
+  const view = g.viewFor(room, room.hostId);
+  assert.equal(view.theme.label, 'Séries');
+});

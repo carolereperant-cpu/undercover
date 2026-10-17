@@ -19,6 +19,7 @@ export default function Discussion({ state, act }) {
   return (
     <div className="stack">
       <h1 className="display">Manche {round}</h1>
+      {state.theme && <p className="notice">Thème : {state.theme.emoji} {state.theme.label}</p>}
       <p className="lead">
         Chacun son tour, donne un indice sur ton mot : un mot ou une phrase courte, sans prononcer le mot lui-même. À
         voix haute, tous ensemble.

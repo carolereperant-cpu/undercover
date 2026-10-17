@@ -2,7 +2,7 @@
 
 // Paires de mots : [mot A, mot B]. Les deux mots sont proches mais pas identiques.
 // Le serveur tire une paire au hasard et décide au hasard lequel est le mot des civils.
-const PAIRS = [
+const CLASSIQUE = [
   // Cuisine et boissons
   ['Café', 'Thé'], ['Pizza', 'Quiche'], ['Croissant', 'Pain au chocolat'], ['Baguette', 'Pain de mie'],
   ['Fromage', 'Beurre'], ['Chocolat', 'Caramel'], ['Miel', 'Confiture'], ['Crêpe', 'Gaufre'],
@@ -54,4 +54,85 @@ const PAIRS = [
   ['Bébé', 'Enfant'], ['Cadeau', 'Surprise'],
 ];
 
-module.exports = { PAIRS };
+
+const ANNEES_80 = [
+  ['Walkman', 'Radiocassette'], ['Minitel', 'Téléphone fixe'], ['Rubik’s Cube', 'Taquin'], ['Moon boots', 'Après-ski'],
+  ['Goldorak', 'Albator'], ['Club Dorothée', 'Récré A2'], ['Polaroïd', 'Caméscope'], ['Jogging', 'Aérobic'],
+  ['Pac-Man', 'Space Invaders'], ['Épaulettes', 'Jambières'], ['Michael Jackson', 'Prince'], ['Madonna', 'Cyndi Lauper'],
+  ['Dallas', 'Dynastie'], ['Magnétoscope', 'Cassette vidéo'], ['E.T.', 'Gremlins'], ['Top 50', 'Hit-parade'],
+];
+
+const ANNEES_90 = [
+  ['Tamagotchi', 'Game Boy'], ['Spice Girls', 'Backstreet Boys'], ['Beverly Hills', 'Dawson'], ['Cassette', 'CD'],
+  ['Pokémon', 'Digimon'], ['Titanic', 'Jurassic Park'], ['Nirvana', 'Oasis'], ['Discman', 'Walkman'],
+  ['Super Nintendo', 'Mega Drive'], ['Les Simpson', 'South Park'], ['MC Solaar', 'IAM'], ['Zidane', 'Ronaldo'],
+  ['Tomb Raider', 'Super Mario'], ['Furby', 'Polly Pocket'], ['Pogs', 'Cartes Pokémon'], ['McDonald’s', 'Quick'],
+];
+
+const MILLENIALS = [
+  ['MSN', 'Skype'], ['Skyblog', 'Facebook'], ['iPod', 'Lecteur MP3'], ['Nokia 3310', 'Motorola Razr'],
+  ['Loft Story', 'Star Academy'], ['Wii', 'PlayStation'], ['Harry Potter', 'Twilight'], ['Lady Gaga', 'Rihanna'],
+  ['YouTube', 'Dailymotion'], ['Kinder Bueno', 'Kinder Délice'], ['Tektonik', 'Hip-hop'], ['Crocs', 'Tongs'],
+  ['Hunger Games', 'Divergente'], ['Shakira', 'Beyoncé'], ['Candy Crush', 'Angry Birds'], ['BlackBerry', 'iPhone'],
+];
+
+const GEN_Z = [
+  ['TikTok', 'Reels'], ['BeReal', 'Snapchat'], ['AirPods', 'Écouteurs filaires'], ['Vinted', 'Leboncoin'],
+  ['Twitch', 'YouTube'], ['Fortnite', 'Roblox'], ['Bubble tea', 'Smoothie'], ['Discord', 'WhatsApp'],
+  ['Squeezie', 'Inoxtag'], ['Billie Eilish', 'Dua Lipa'], ['Skincare', 'Maquillage'], ['Trottinette électrique', 'Hoverboard'],
+  ['Spotify', 'Deezer'], ['Emoji', 'Sticker'], ['Influenceur', 'Streamer'], ['Shein', 'Zara'],
+  ['Uber Eats', 'Deliveroo'], ['ChatGPT', 'Google'],
+];
+
+const FILMS = [
+  ['Titanic', 'Avatar'], ['Shrek', 'Madagascar'], ['Harry Potter', 'Le Seigneur des anneaux'], ['Star Wars', 'Star Trek'],
+  ['Batman', 'Superman'], ['Toy Story', 'Cars'], ['La Reine des neiges', 'Raiponce'], ['Le Roi Lion', 'Bambi'],
+  ['Astérix', 'Tintin'], ['Intouchables', 'Bienvenue chez les Ch’tis'], ['Jurassic Park', 'Godzilla'], ['Matrix', 'Inception'],
+  ['Minions', 'Schtroumpfs'], ['Taxi', 'Fast & Furious'], ['Spider-Man', 'Iron Man'], ['Indiana Jones', 'Pirates des Caraïbes'],
+  ['Marvel', 'DC Comics'], ['Oscar', 'César'],
+];
+
+const SERIES = [
+  ['Netflix', 'Disney+'], ['Squid Game', 'La Casa de Papel'], ['Stranger Things', 'Wednesday'], ['Game of Thrones', 'Vikings'],
+  ['Friends', 'How I Met Your Mother'], ['Breaking Bad', 'Peaky Blinders'], ['Les Simpson', 'Family Guy'], ['Lupin', 'Dix pour cent'],
+  ['Plus belle la vie', 'Demain nous appartient'], ['Emily in Paris', 'Sex and the City'], ['Les Feux de l’amour', 'Santa Barbara'],
+  ['Les Experts', 'NCIS'], ['Grey’s Anatomy', 'Dr House'], ['Koh-Lanta', 'Fort Boyard'], ['The Witcher', 'Arcane'],
+  ['Bridgerton', 'Downton Abbey'], ['Prison Break', 'Lost'], ['Scènes de ménages', 'Joséphine ange gardien'],
+];
+
+const MUSIQUE = [
+  ['Guitare', 'Basse'], ['Rap', 'Rock'], ['Concert', 'Festival'], ['Casque', 'Enceinte'],
+  ['Piano', 'Orgue'], ['Violon', 'Violoncelle'], ['Batterie', 'Djembé'], ['Scène', 'Studio d’enregistrement'],
+  ['Vinyle', 'Cassette audio'], ['Karaoké', 'Chorale'], ['Flûte', 'Clarinette'], ['Trompette', 'Saxophone'],
+  ['Daft Punk', 'Justice'], ['Mozart', 'Beethoven'], ['Édith Piaf', 'Dalida'], ['Johnny Hallyday', 'Eddy Mitchell'],
+  ['Clavier', 'Synthétiseur'], ['Techno', 'Électro'], ['Ukulélé', 'Banjo'],
+];
+
+const ENFANTS = [
+  ['Peluche', 'Doudou'], ['Toboggan', 'Balançoire'], ['Pâte à modeler', 'Slime'], ['Lego', 'Playmobil'],
+  ['Crayon', 'Feutre'], ['Dinosaure', 'Licorne'], ['Sucette', 'Barbe à papa'], ['Cartable', 'Trousse'],
+  ['Pyjama', 'Chaussons'], ['Bain', 'Douche'], ['Trottinette', 'Patins à roulettes'], ['Cabane', 'Château de sable'],
+  ['Princesse', 'Fée'], ['Pompier', 'Super-héros'], ['Pat’ Patrouille', 'Peppa Pig'], ['Bulles de savon', 'Ballon'],
+  ['Bac à sable', 'Piscine gonflable'], ['Tétine', 'Biberon'], ['Cirque', 'Fête foraine'],
+];
+
+/**
+ * Les thèmes proposés à l'hôte. Chaque thème est un lot de paires de mots proches.
+ * "classique" regroupe les paires de la première version du jeu.
+ */
+const THEMES = [
+  { id: 'classique', label: 'Classique', emoji: '🎲', pairs: CLASSIQUE },
+  { id: 'annees80', label: 'Années 80', emoji: '📼', pairs: ANNEES_80 },
+  { id: 'annees90', label: 'Années 90', emoji: '💾', pairs: ANNEES_90 },
+  { id: 'millenials', label: 'Millénials', emoji: '📱', pairs: MILLENIALS },
+  { id: 'genz', label: 'Gen Z', emoji: '🔥', pairs: GEN_Z },
+  { id: 'films', label: 'Films', emoji: '🎬', pairs: FILMS },
+  { id: 'series', label: 'Séries', emoji: '📺', pairs: SERIES },
+  { id: 'musique', label: 'Musique', emoji: '🎵', pairs: MUSIQUE },
+  { id: 'enfants', label: 'Enfants', emoji: '🧸', pairs: ENFANTS },
+];
+
+const THEME_IDS = THEMES.map((t) => t.id);
+const PAIRS = THEMES.flatMap((t) => t.pairs);
+
+module.exports = { THEMES, THEME_IDS, PAIRS };
