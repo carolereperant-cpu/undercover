@@ -1,6 +1,6 @@
 # Undercover
 
-Jeu de déduction en ligne pour 4 à 12 joueurs. Chacun joue sur son propre smartphone : une personne crée une salle, les autres entrent le code (ou ouvrent le lien partagé), et la partie se déroule en temps réel. Gratuit, sans compte, sans base de données.
+Jeu de déduction en ligne pour 3 à 12 joueurs. Chacun joue sur son propre smartphone : une personne crée une salle, les autres entrent le code (ou ouvrent le lien partagé), et la partie se déroule en temps réel. Gratuit, sans compte, sans base de données.
 
 ## Lancer le jeu sur ton ordinateur
 
@@ -45,7 +45,7 @@ Pour vérifier que tout fonctionne : `npm test` (32 tests).
 | Le Bouclier | mot des civils | annule le premier vote contre lui, mais son rôle est alors révélé |
 | Le Détective | mot des civils | une fois par partie, compare son mot avec celui d'un joueur |
 
-Répartition automatique : 4 joueurs = Civils + 1 Undercover. Mr White dès 5 joueurs, le Bouclier dès 6, le Détective dès 7, un second Undercover dès 9. À 12 joueurs : 7 civils, 2 undercovers, Mr White, le Bouclier et le Détective. L'hôte peut désactiver les rôles spéciaux dans la salle d'attente.
+Répartition automatique : 3 ou 4 joueurs = Civils + 1 Undercover. Mr White dès 5 joueurs, le Bouclier dès 6, le Détective dès 7, un second Undercover dès 9. À 12 joueurs : 7 civils, 2 undercovers, Mr White, le Bouclier et le Détective. L'hôte peut désactiver les rôles spéciaux dans la salle d'attente.
 
 ## Mettre en ligne gratuitement (Render)
 

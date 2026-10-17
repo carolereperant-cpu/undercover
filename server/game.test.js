@@ -47,8 +47,8 @@ const voteAll = (room, targetId) => {
 
 // ---------------------------------------------------------------------------
 
-test('rolePlan : de 4 à 12 joueurs, les civils sont toujours plus nombreux que les infiltrés', () => {
-  for (let n = 4; n <= 12; n++) {
+test('rolePlan : de 3 à 12 joueurs, les civils sont toujours plus nombreux que les infiltrés', () => {
+  for (let n = 3; n <= 12; n++) {
     const plan = g.rolePlan(n);
     const total = Object.values(plan).reduce((a, b) => a + b, 0);
     assert.equal(total, n, `n=${n}`);
@@ -89,8 +89,8 @@ test('addPlayer : pseudo unique, salle limitée à 12, impossible après le déb
   assert.equal(g.addPlayer(room, 'Retardataire').ok, false);
 });
 
-test('startGame : réservé à l’hôte et à partir de 4 joueurs', () => {
-  const small = makeRoom(3);
+test('startGame : réservé à l’hôte et à partir de 3 joueurs', () => {
+  const small = makeRoom(2);
   assert.equal(g.startGame(small, small.hostId).ok, false);
   const room = makeRoom(5);
   const notHost = room.players[1].id;
@@ -100,7 +100,7 @@ test('startGame : réservé à l’hôte et à partir de 4 joueurs', () => {
 });
 
 test('startGame : la répartition réelle correspond au plan', () => {
-  for (let n = 4; n <= 12; n++) {
+  for (let n = 3; n <= 12; n++) {
     const room = makeRoom(n);
     g.startGame(room, room.hostId);
     const counts = { civil: 0, undercover: 0, mrwhite: 0, bouclier: 0, detective: 0 };
@@ -300,8 +300,8 @@ test('passage de l’hôte : retrait de l’hôte dans le lobby', () => {
   assert.ok(g.getPlayer(room, room.hostId));
 });
 
-test('simulation : 600 parties aléatoires de 4 à 12 joueurs se terminent toujours', () => {
-  for (let n = 4; n <= 12; n++) {
+test('simulation : 650 parties aléatoires de 3 à 12 joueurs se terminent toujours', () => {
+  for (let n = 3; n <= 12; n++) {
     for (let run = 0; run < 50; run++) {
       const room = makeRoom(n);
       g.startGame(room, room.hostId);
@@ -422,7 +422,7 @@ test('simulation avec invités : 200 parties se terminent', () => {
     const owner = room.players[1];
     g.addGuest(room, owner.id, 'Enfant1');
     if (room.players.length < 12) g.addGuest(room, room.hostId, 'Enfant2');
-    if (room.players.length < 4) continue;
+    if (room.players.length < 3) continue;
     g.startGame(room, room.hostId);
     g.beginDiscussion(room, room.hostId);
     let guard = 0;

@@ -55,7 +55,7 @@ export default function Rules({ onClose }) {
 
         <h3>Bon à savoir</h3>
         <p>
-          De 4 à 12 joueurs. Mr White apparaît dès 5 joueurs, le Bouclier dès 6, le Détective dès 7. L’hôte peut
+          De 3 à 12 joueurs. À 3, un seul vote décide de la partie. Mr White apparaît dès 5 joueurs, le Bouclier dès 6, le Détective dès 7. L’hôte peut
           désactiver ces rôles avant de lancer la partie.
         </p>
         <p>

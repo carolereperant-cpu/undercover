@@ -11,7 +11,7 @@
 const crypto = require('node:crypto');
 const { PAIRS } = require('./words');
 
-const MIN_PLAYERS = 4;
+const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 12;
 const NAME_MAX = 16;
 const WORD_MAX = 30;

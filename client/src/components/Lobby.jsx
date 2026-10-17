@@ -133,7 +133,7 @@ export default function Lobby({ state, act, notify }) {
       )}
 
       <section className="stack tight">
-        <h2>Rôles pour {count} joueurs</h2>
+        <h2>Rôles pour {count} joueur{count > 1 ? 's' : ''}</h2>
         <ul className="plan">
           {PLAN_ORDER.filter((r) => plan[r] > 0).map((r) => (
             <li key={r}>
