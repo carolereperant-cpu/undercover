@@ -1453,3 +1453,155 @@ button.sea-cell:disabled {
     font-size: 0.85rem;
   }
 }
+
+/* --- Les Quatre Couronnes (jeu de cartes) ---------------------------------- */
+
+.cc-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.8rem;
+  background: var(--surface);
+}
+
+.cc-row {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.cc-row.wrap {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.cc-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.cc-actions .btn:first-child {
+  grid-column: 1 / -1;
+}
+
+.cc-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.cc-tabs button {
+  min-height: 2.6rem;
+  border: 2px solid var(--line);
+  border-radius: 0.7rem;
+  background: transparent;
+  color: var(--fg);
+  font: 700 1rem var(--font-body);
+}
+
+.cc-tabs button.on {
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border-color: var(--btn-bg);
+}
+
+.cc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: calc(50% - 0.25rem);
+  max-width: 10rem;
+  flex: 0 0 auto;
+  padding: 0;
+  overflow: hidden;
+  border: 3px solid var(--fc, var(--line));
+  border-radius: 0.8rem;
+  background: var(--snow);
+  color: var(--ink);
+  text-align: left;
+  font: 600 0.78rem var(--font-body);
+  cursor: pointer;
+}
+
+.cc.small {
+  width: 7.2rem;
+}
+
+.cc:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.cc.tapped {
+  transform: rotate(4deg);
+  opacity: 0.6;
+}
+
+.cc.garde {
+  border-style: double;
+  border-width: 5px;
+}
+
+.cc-art {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+}
+
+.cc-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.6rem;
+}
+
+.cc-name {
+  padding: 0.25rem 0.4rem 0;
+  font-weight: 800;
+}
+
+.cc-cost {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--snow);
+  font-weight: 800;
+}
+
+.cc-def {
+  position: absolute;
+  top: 0.3rem;
+  left: 0.3rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 0.6rem;
+  background: var(--ink);
+  color: var(--snow);
+  font-weight: 800;
+}
+
+.cc-fx {
+  padding: 0.1rem 0.4rem 0.4rem;
+}
+
+.cc-fx em {
+  display: block;
+  font-style: normal;
+  opacity: 0.75;
+}
+
+.seat-switch {
+  display: flex;
+  gap: 0.4rem;
+}

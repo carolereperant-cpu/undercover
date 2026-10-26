@@ -28,6 +28,7 @@ const MINI = {
   petitbac: require('./petitbac'),
   taboo: require('./taboo'),
   codenames: require('./codenames'),
+  couronnes: require('./couronnes'),
 };
 
 const UNDERCOVER_META = {

@@ -538,6 +538,16 @@ test('simulation : chaque jeu se termine avec des joueurs aléatoires', () => {
             if (rnd(2)) act(room, spy, 'spyGuess', { location: require('./minigames/content').LOCATIONS[rnd(24)] });
             else act(room, host, 'giveUp');
           },
+          couronnes: () => {
+            const who = room.players.find((p) => p.id === mg.ids[mg.turn]);
+            const v = g.viewFor(room, who.id).mg;
+            for (const c of v.hand) act(room, who, 'play', { uid: c.uid });
+            for (const c of v.champions) act(room, who, 'activate', { uid: c.uid });
+            for (const c of v.foeChampions) act(room, who, 'attack', { target: c.uid });
+            act(room, who, 'attack', { target: 'player' });
+            act(room, who, 'buy', { index: rnd(5) });
+            act(room, who, 'endTurn');
+          },
           puissance4: () => { act(room, room.players.find((p) => p.id === mg.ids[mg.turn]), 'drop', { col: rnd(7) }); },
           bataille: () => {
             room.players.forEach((p) => act(room, p, 'ready'));

@@ -1,0 +1,489 @@
+{
+ "FACTIONS": {
+  "sylvains": {
+   "name": "Sylvains",
+   "emoji": "🌿",
+   "color": "#4caf50",
+   "theme": "soin et défense"
+  },
+  "cendres": {
+   "name": "Cendrés",
+   "emoji": "🔥",
+   "color": "#e5484d",
+   "theme": "attaque brutale"
+  },
+  "marees": {
+   "name": "Marées",
+   "emoji": "🌊",
+   "color": "#3b82f6",
+   "theme": "or et pioche"
+  },
+  "ombres": {
+   "name": "Ombres",
+   "emoji": "🌙",
+   "color": "#8b5cf6",
+   "theme": "ruse et défausse adverse"
+  },
+  "neutre": {
+   "name": "Villageois",
+   "emoji": "🏘️",
+   "color": "#b8a98a",
+   "theme": "cartes de départ"
+  }
+ },
+ "STYLE": "Illustration de carte de jeu fantasy, peinture numérique, cadrage portrait 3:4, personnage ou objet au centre, éclairage dramatique, fond simple et flou, aucun texte, aucun logo, aucun cadre",
+ "STARTERS": [
+  {
+   "id": "ecu",
+   "name": "Écu d’argent",
+   "faction": "neutre",
+   "type": "action",
+   "cost": 0,
+   "fx": {
+    "g": 1
+   },
+   "prompt": "une pile de pièces d’argent gravées d’une couronne, sur une table en bois"
+  },
+  {
+   "id": "baton",
+   "name": "Bâton de marche",
+   "faction": "neutre",
+   "type": "action",
+   "cost": 0,
+   "fx": {
+    "a": 1
+   },
+   "prompt": "un bâton de voyageur noueux appuyé contre un mur de pierre"
+  },
+  {
+   "id": "amulette",
+   "name": "Amulette de laine",
+   "faction": "neutre",
+   "type": "action",
+   "cost": 0,
+   "fx": {
+    "h": 1
+   },
+   "prompt": "une petite amulette en laine tressée posée dans une main"
+  }
+ ],
+ "MARKET": [
+  {
+   "id": "cueilleuse",
+   "name": "Cueilleuse des brumes",
+   "faction": "sylvains",
+   "type": "action",
+   "cost": 1,
+   "fx": {
+    "h": 2
+   },
+   "ally": {
+    "g": 1
+   },
+   "prompt": "une jeune cueilleuse d’herbes dans une forêt brumeuse, panier de plantes lumineuses"
+  },
+  {
+   "id": "archer",
+   "name": "Archer des cimes",
+   "faction": "sylvains",
+   "type": "action",
+   "cost": 2,
+   "fx": {
+    "a": 3
+   },
+   "ally": {
+    "h": 2
+   },
+   "prompt": "un archer elfe perché dans un arbre géant, arc tendu, feuillage doré"
+  },
+  {
+   "id": "chene",
+   "name": "Gardien-chêne",
+   "faction": "sylvains",
+   "type": "champion",
+   "cost": 3,
+   "def": 4,
+   "garde": true,
+   "act": {
+    "h": 2
+   },
+   "prompt": "un grand gardien fait de bois et de mousse, bras comme des branches, yeux lumineux verts"
+  },
+  {
+   "id": "druide",
+   "name": "Druide des racines",
+   "faction": "sylvains",
+   "type": "champion",
+   "cost": 4,
+   "def": 3,
+   "act": {
+    "g": 2
+   },
+   "prompt": "un vieux druide à longue barbe, racines qui sortent du sol autour de lui, bâton fleuri"
+  },
+  {
+   "id": "loup",
+   "name": "Loup blanc",
+   "faction": "sylvains",
+   "type": "action",
+   "cost": 3,
+   "fx": {
+    "a": 4
+   },
+   "prompt": "un grand loup blanc qui bondit dans une forêt enneigée"
+  },
+  {
+   "id": "source",
+   "name": "Source sacrée",
+   "faction": "sylvains",
+   "type": "action",
+   "cost": 4,
+   "fx": {
+    "h": 5
+   },
+   "ally": {
+    "d": 1
+   },
+   "prompt": "une source d’eau claire lumineuse entourée de fleurs dans une clairière"
+  },
+  {
+   "id": "ancien",
+   "name": "Ancien de la forêt",
+   "faction": "sylvains",
+   "type": "champion",
+   "cost": 6,
+   "def": 6,
+   "garde": true,
+   "act": {
+    "a": 3
+   },
+   "prompt": "un arbre colossal avec un visage sage et des lianes, immense et protecteur"
+  },
+  {
+   "id": "reinefeuilles",
+   "name": "Reine des feuilles",
+   "faction": "sylvains",
+   "type": "action",
+   "cost": 7,
+   "fx": {
+    "h": 6,
+    "a": 4
+   },
+   "ally": {
+    "d": 2
+   },
+   "prompt": "une reine elfe couronnée de feuilles, cape de lierre, aura verte"
+  },
+  {
+   "id": "forgeron",
+   "name": "Forgeron de braise",
+   "faction": "cendres",
+   "type": "action",
+   "cost": 1,
+   "fx": {
+    "a": 2
+   },
+   "ally": {
+    "g": 1
+   },
+   "prompt": "un forgeron musclé frappant une lame rougeoyante, étincelles"
+  },
+  {
+   "id": "lancier",
+   "name": "Lancier ardent",
+   "faction": "cendres",
+   "type": "action",
+   "cost": 2,
+   "fx": {
+    "a": 3
+   },
+   "ally": {
+    "a": 2
+   },
+   "prompt": "un soldat en armure rouge avec une lance enflammée"
+  },
+  {
+   "id": "chevalier",
+   "name": "Chevalier de cendre",
+   "faction": "cendres",
+   "type": "champion",
+   "cost": 3,
+   "def": 3,
+   "act": {
+    "a": 2
+   },
+   "prompt": "un chevalier en armure noircie, cape déchirée, cendres qui tombent"
+  },
+  {
+   "id": "pyro",
+   "name": "Pyromancienne",
+   "faction": "cendres",
+   "type": "action",
+   "cost": 4,
+   "fx": {
+    "a": 5
+   },
+   "ally": {
+    "x": 1
+   },
+   "prompt": "une magicienne qui jette une boule de feu, cheveux flottant, lueur orange"
+  },
+  {
+   "id": "titan",
+   "name": "Titan de lave",
+   "faction": "cendres",
+   "type": "champion",
+   "cost": 5,
+   "def": 5,
+   "garde": true,
+   "act": {
+    "a": 3
+   },
+   "prompt": "un géant de roche volcanique avec de la lave qui coule, bras énormes"
+  },
+  {
+   "id": "dragonnet",
+   "name": "Dragonnet",
+   "faction": "cendres",
+   "type": "action",
+   "cost": 5,
+   "fx": {
+    "a": 6
+   },
+   "prompt": "un jeune dragon rouge crachant une flamme, ailes déployées sur une falaise"
+  },
+  {
+   "id": "seigneur",
+   "name": "Seigneur de guerre",
+   "faction": "cendres",
+   "type": "champion",
+   "cost": 6,
+   "def": 4,
+   "act": {
+    "a": 4
+   },
+   "prompt": "un seigneur de guerre cornu avec une grande hache, bannière rouge derrière lui"
+  },
+  {
+   "id": "phenix",
+   "name": "Phénix",
+   "faction": "cendres",
+   "type": "action",
+   "cost": 7,
+   "fx": {
+    "a": 7,
+    "h": 3
+   },
+   "ally": {
+    "d": 1
+   },
+   "prompt": "un phénix en flammes qui renaît, ailes immenses, ciel de braises"
+  },
+  {
+   "id": "marchand",
+   "name": "Marchand des quais",
+   "faction": "marees",
+   "type": "action",
+   "cost": 1,
+   "fx": {
+    "g": 2
+   },
+   "prompt": "un marchand souriant sur un quai de port, caisses et lanternes"
+  },
+  {
+   "id": "navigatrice",
+   "name": "Navigatrice",
+   "faction": "marees",
+   "type": "action",
+   "cost": 2,
+   "fx": {
+    "d": 1,
+    "g": 1
+   },
+   "prompt": "une navigatrice avec une carte et un compas à la proue d’un bateau"
+  },
+  {
+   "id": "sirene",
+   "name": "Sirène chanteuse",
+   "faction": "marees",
+   "type": "champion",
+   "cost": 3,
+   "def": 2,
+   "act": {
+    "d": 1
+   },
+   "prompt": "une sirène assise sur un rocher, chantant, vagues argentées sous la lune"
+  },
+  {
+   "id": "corsaire",
+   "name": "Corsaire",
+   "faction": "marees",
+   "type": "action",
+   "cost": 3,
+   "fx": {
+    "a": 3,
+    "g": 1
+   },
+   "prompt": "un corsaire avec un sabre et un chapeau à plume, voile de navire en arrière-plan"
+  },
+  {
+   "id": "banquier",
+   "name": "Banquier du port",
+   "faction": "marees",
+   "type": "champion",
+   "cost": 4,
+   "def": 3,
+   "act": {
+    "g": 3
+   },
+   "prompt": "un banquier en habit bleu avec un grand livre de comptes et des coffres"
+  },
+  {
+   "id": "kraken",
+   "name": "Kraken",
+   "faction": "marees",
+   "type": "champion",
+   "cost": 6,
+   "def": 6,
+   "garde": true,
+   "act": {
+    "a": 3
+   },
+   "prompt": "un kraken géant dont les tentacules sortent de la mer sombre autour d’un navire"
+  },
+  {
+   "id": "tempete",
+   "name": "Tempête",
+   "faction": "marees",
+   "type": "action",
+   "cost": 5,
+   "fx": {
+    "a": 4,
+    "d": 1
+   },
+   "ally": {
+    "a": 3
+   },
+   "prompt": "une tempête en mer avec des vagues énormes et des éclairs"
+  },
+  {
+   "id": "amiral",
+   "name": "Amiral des abysses",
+   "faction": "marees",
+   "type": "action",
+   "cost": 7,
+   "fx": {
+    "g": 3,
+    "d": 2,
+    "a": 3
+   },
+   "prompt": "un amiral aux traits sombres avec un manteau couvert de coquillages, vaisseau fantôme"
+  },
+  {
+   "id": "rodeuse",
+   "name": "Rôdeuse",
+   "faction": "ombres",
+   "type": "action",
+   "cost": 1,
+   "fx": {
+    "a": 1,
+    "g": 1
+   },
+   "prompt": "une voleuse encapuchonnée qui court sur un toit la nuit"
+  },
+  {
+   "id": "espion",
+   "name": "Espion",
+   "faction": "ombres",
+   "type": "action",
+   "cost": 2,
+   "fx": {
+    "x": 1
+   },
+   "ally": {
+    "a": 2
+   },
+   "prompt": "un espion en manteau, regardant par une fenêtre éclairée, ombre longue"
+  },
+  {
+   "id": "assassin",
+   "name": "Assassin",
+   "faction": "ombres",
+   "type": "action",
+   "cost": 3,
+   "fx": {
+    "a": 4
+   },
+   "ally": {
+    "x": 1
+   },
+   "prompt": "un assassin masqué avec deux dagues, silhouette violette dans une ruelle"
+  },
+  {
+   "id": "necro",
+   "name": "Nécromancien",
+   "faction": "ombres",
+   "type": "champion",
+   "cost": 4,
+   "def": 3,
+   "act": {
+    "a": 2
+   },
+   "prompt": "un nécromancien en robe sombre qui relève des squelettes dans un cimetière"
+  },
+  {
+   "id": "spectre",
+   "name": "Spectre",
+   "faction": "ombres",
+   "type": "champion",
+   "cost": 5,
+   "def": 4,
+   "act": {
+    "x": 1
+   },
+   "prompt": "un spectre pâle et flottant dans un couloir de château, chaînes brisées"
+  },
+  {
+   "id": "maitre",
+   "name": "Maître des voleurs",
+   "faction": "ombres",
+   "type": "action",
+   "cost": 5,
+   "fx": {
+    "x": 1,
+    "g": 2,
+    "a": 2
+   },
+   "prompt": "un chef de voleurs assis sur un trône de coffres volés, sourire en coin"
+  },
+  {
+   "id": "reineombre",
+   "name": "Reine d’ombre",
+   "faction": "ombres",
+   "type": "action",
+   "cost": 6,
+   "fx": {
+    "a": 5,
+    "x": 1
+   },
+   "ally": {
+    "d": 1
+   },
+   "prompt": "une reine aux yeux violets dont la robe se dissout en fumée noire"
+  },
+  {
+   "id": "liche",
+   "name": "Liche ancienne",
+   "faction": "ombres",
+   "type": "champion",
+   "cost": 7,
+   "def": 7,
+   "garde": true,
+   "act": {
+    "a": 3,
+    "x": 1
+   },
+   "prompt": "une liche couronnée, squelette en robe royale, flammes violettes dans les orbites"
+  }
+ ]
+}

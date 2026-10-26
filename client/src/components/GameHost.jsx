@@ -16,6 +16,7 @@ import QuiSuisJe from '../games/QuiSuisJe.jsx';
 import PetitBac from '../games/PetitBac.jsx';
 import Taboo from '../games/Taboo.jsx';
 import Codenames from '../games/Codenames.jsx';
+import Couronnes from '../games/Couronnes.jsx';
 
 // Un écran par mini-jeu. Pour ajouter un jeu : un composant dans games/ et une ligne ici.
 const SCREENS = {
@@ -37,6 +38,7 @@ const SCREENS = {
   petitbac: PetitBac,
   taboo: Taboo,
   codenames: Codenames,
+  couronnes: Couronnes,
 };
 
 export default function GameHost(props) {
