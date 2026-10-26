@@ -14,6 +14,7 @@ const helmet = require('helmet');
 const { Server } = require('socket.io');
 const game = require('./game');
 const { GAMES } = require('./minigames');
+const couronnesBot = require('./minigames/couronnes-bot');
 
 const PORT = Number(process.env.PORT) || 3001;
 const CLIENT_DIST = path.join(__dirname, '..', 'client', 'dist');
@@ -23,6 +24,8 @@ const LOBBY_GRACE_MS = 120_000; // un joueur déconnecté du lobby est retiré a
 const HOST_GRACE_MS = 60_000; // l'hôte déconnecté passe la main après 1 min
 const ROOM_IDLE_MS = 30 * 60_000; // salle vide supprimée après 30 min
 const ROOM_MAX_AGE_MS = 6 * 60 * 60_000; // aucune salle ne vit plus de 6 h sans activité
+
+const BOT_DELAY_MS = Number(process.env.BOT_DELAY_MS) || 800; // pause entre deux actions du bot
 
 const rooms = new Map(); // code -> room
 const sessions = new Map(); // socket.id -> { code, playerId }
@@ -87,6 +90,35 @@ function broadcast(room) {
   for (const p of room.players) {
     if (p.socketId) io.to(p.socketId).emit('state', game.viewFor(room, p.id));
   }
+  scheduleBot(room);
+}
+
+/**
+ * Le bot joue son tour pas à pas (une action toutes les BOT_DELAY_MS) pour que l'humain voit ce qui se passe.
+ * Un seul minuteur par salle : appeler scheduleBot plusieurs fois ne lance pas plusieurs tours en parallèle.
+ */
+const botTimers = new Map(); // code -> timeout
+function scheduleBot(room) {
+  if (room.gameType !== 'couronnes' || room.phase !== 'playing' || !room.mg || botTimers.has(room.code)) return;
+  const bot = room.players.find((p) => p.bot);
+  if (!bot || room.mg.ids[room.mg.turn] !== bot.id) return;
+  const timer = setTimeout(() => {
+    botTimers.delete(room.code);
+    if (rooms.get(room.code) !== room || room.phase !== 'playing') return;
+    try {
+      const move = couronnesBot.nextMove(room, bot.id);
+      if (!move) return;
+      const res = game.miniAct(room, bot, move);
+      // Filet de sécurité : si une action est refusée, on termine le tour plutôt que de bloquer la partie.
+      if (!res.ok) game.miniAct(room, bot, { type: 'endTurn' });
+    } catch (e) {
+      console.error('[bot]', e);
+      game.miniAct(room, bot, { type: 'endTurn' });
+    }
+    broadcast(room);
+  }, BOT_DELAY_MS);
+  timer.unref?.();
+  botTimers.set(room.code, timer);
 }
 
 function contextOf(socket) {
@@ -240,6 +272,8 @@ io.on('connection', (socket) => {
     });
 
   action('guest:add', (room, p, { name }) => game.addGuest(room, p.id, name));
+  action('bot:add', (room, p) => game.addBot(room, p.id));
+  action('bot:remove', (room, p) => game.removeBot(room, p.id));
   action('guest:remove', (room, p, { guestId }) => game.removeGuest(room, p.id, guestId));
 
   actionAs('game:act', (room, p, payload) => game.miniAct(room, p, payload));
@@ -285,7 +319,7 @@ io.on('connection', (socket) => {
 const sweeper = setInterval(() => {
   const now = Date.now();
   for (const [code, room] of rooms) {
-    const empty = !room.players.some((p) => p.connected);
+    const empty = !room.players.some((p) => p.connected && !p.bot);
     if ((empty && now - room.lastActivity > ROOM_IDLE_MS) || now - room.lastActivity > ROOM_MAX_AGE_MS) {
       rooms.delete(code);
     }

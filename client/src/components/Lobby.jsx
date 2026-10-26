@@ -108,6 +108,7 @@ export default function Lobby({ state, act, notify }) {
                 {p.id === meId && ' (toi)'}
               </span>
               {p.isHost && <span className="tag">Hôte</span>}
+              {p.bot && <span className="tag soft">🤖 Bot</span>}
               {p.guest && (
                 <span className="tag soft">{p.ownerId === meId ? 'Sur ton écran' : `Sur l’écran de ${ownerName(p.ownerId)}`}</span>
               )}
@@ -137,6 +138,11 @@ export default function Lobby({ state, act, notify }) {
             </li>
           ))}
         </ul>
+        {isHost && state.canBot && count < limits.max && !players.some((p) => p.bot) && (
+          <button type="button" className="btn secondary" onClick={() => act('bot:add', {})}>
+            🤖 Jouer contre un bot
+          </button>
+        )}
       </section>
 
       {!state.noGuests && myGuests.length < MAX_GUESTS && count < limits.max && (

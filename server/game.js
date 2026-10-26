@@ -90,6 +90,7 @@ function makePlayer(name, ownerId = null) {
     shieldUsed: false,
     revealed: null, // rôle rendu public (élimination ou bouclier activé)
     investigation: null,
+    bot: false, // vrai pour un adversaire joué par le serveur
   };
 }
 
@@ -178,6 +179,29 @@ function addGuest(room, ownerId, rawName) {
   return ok({ player: guest });
 }
 
+/** Ajoute un adversaire joué par le serveur (seulement pour les jeux qui le prévoient, depuis la salle d'attente). */
+function addBot(room, actorId) {
+  if (room.hostId !== actorId) return err('Seul l’hôte peut ajouter un bot.');
+  if (room.phase !== 'lobby') return err('Impossible en cours de partie.');
+  const meta = metaOf(room.gameType);
+  if (!meta || !meta.bots) return err('Ce jeu n’a pas de bot.');
+  if (room.players.some((p) => p.bot)) return err('Il y a déjà un bot.');
+  if (room.players.length >= room.maxPlayers) return err('La salle est pleine.');
+  const bot = makePlayer(meta.botName || 'Bot');
+  bot.token = null;
+  bot.bot = true;
+  bot.connected = true;
+  room.players.push(bot);
+  return ok({ player: bot });
+}
+
+function removeBot(room, actorId) {
+  if (room.hostId !== actorId) return err('Seul l’hôte peut retirer le bot.');
+  if (room.phase !== 'lobby') return err('Impossible en cours de partie.');
+  room.players = room.players.filter((p) => !p.bot);
+  return ok();
+}
+
 function removeGuest(room, ownerId, guestId) {
   if (room.phase !== 'lobby') return err('Impossible en cours de partie.');
   const guest = getPlayer(room, guestId);
@@ -188,7 +212,7 @@ function removeGuest(room, ownerId, guestId) {
 
 /** Le nouvel hôte est toujours un vrai joueur (jamais un invité), de préférence connecté. */
 function transferHost(room) {
-  const real = room.players.filter((p) => !p.ownerId && p.id !== room.hostId);
+  const real = room.players.filter((p) => !p.ownerId && !p.bot && p.id !== room.hostId);
   const next = real.find((p) => p.connected) || real[0];
   if (next) room.hostId = next.id;
 }
@@ -199,6 +223,8 @@ function removePlayer(room, playerId) {
   const wasHost = room.hostId === playerId;
   // Retirer un joueur retire aussi ceux qui jouaient sur son écran.
   room.players = room.players.filter((p) => p.id !== playerId && p.ownerId !== playerId);
+  // Un bot ne reste jamais seul dans une salle.
+  if (!room.players.some((p) => !p.bot)) room.players = [];
   if (wasHost && room.players.length > 0) transferHost(room);
   return ok();
 }
@@ -559,6 +585,7 @@ function viewFor(room, playerId) {
       id: p.id,
       name: p.name,
       guest: Boolean(p.ownerId),
+      bot: Boolean(p.bot),
       ownerId: p.ownerId,
       alive: p.alive,
       connected: isOnline(room, p),
@@ -573,6 +600,7 @@ function viewFor(room, playerId) {
     view.gameType = room.gameType;
     view.game = metaOf(room.gameType);
     view.noGuests = room.noGuests;
+    view.canBot = Boolean(view.game && view.game.bots);
   }
 
   // Mini-jeux : chacun reçoit sa propre vue, et le propriétaire reçoit aussi celle de ses invités.
@@ -665,6 +693,8 @@ module.exports = {
   miniAct,
   addPlayer,
   addGuest,
+  addBot,
+  removeBot,
   removeGuest,
   MAX_GUESTS_PER_PLAYER,
   removePlayer,
