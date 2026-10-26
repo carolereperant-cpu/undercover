@@ -29,14 +29,14 @@ const act = (room, who, type, payload = {}) => g.miniAct(room, typeof who === 'n
 // Général
 // ---------------------------------------------------------------------------
 
-test('hub : la liste des jeux est cohérente (2 à 13 joueurs, durées de 5 à 20 minutes)', () => {
+test('hub : la liste des jeux est cohérente (2 à 13 joueurs, durées de 5 à 45 minutes)', () => {
   assert.equal(GAMES[0].id, 'undercover');
   const ids = new Set();
   for (const meta of GAMES) {
     assert.ok(!ids.has(meta.id));
     ids.add(meta.id);
     assert.ok(meta.min >= 2 && meta.max <= 13 && meta.min <= meta.max, meta.id);
-    assert.ok(meta.maxMinutes >= 5 && meta.maxMinutes <= 20, meta.id);
+    assert.ok(meta.maxMinutes >= 5 && meta.maxMinutes <= 45, meta.id);
     assert.ok(meta.label && meta.emoji && meta.tagline, meta.id);
   }
   assert.ok(GAMES.some((m) => m.min === 2), 'au moins un jeu pour deux');
@@ -546,6 +546,17 @@ test('simulation : chaque jeu se termine avec des joueurs aléatoires', () => {
             for (const c of v.foeChampions) act(room, who, 'attack', { target: c.uid });
             act(room, who, 'attack', { target: 'player' });
             act(room, who, 'buy', { index: rnd(5) });
+            act(room, who, 'endTurn');
+          },
+          conquete: () => {
+            const { NEIGHBORS } = require('./minigames/conquete');
+            const who = room.players.find((p) => p.id === mg.ids[mg.turn]);
+            const mine = () => Object.keys(mg.terr).filter((id) => mg.terr[id].owner === mg.turn);
+            act(room, who, 'place', { territory: mine()[rnd(mine().length)], count: mg.pending });
+            for (let i = 0; i < 3 && room.phase === 'playing'; i++) {
+              const from = mine()[rnd(mine().length)];
+              act(room, who, 'blitz', { from, to: NEIGHBORS[from][rnd(NEIGHBORS[from].length)] });
+            }
             act(room, who, 'endTurn');
           },
           puissance4: () => { act(room, room.players.find((p) => p.id === mg.ids[mg.turn]), 'drop', { col: rnd(7) }); },

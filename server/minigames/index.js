@@ -29,6 +29,7 @@ const MINI = {
   taboo: require('./taboo'),
   codenames: require('./codenames'),
   couronnes: require('./couronnes'),
+  conquete: require('./conquete'),
 };
 
 const UNDERCOVER_META = {

@@ -57,3 +57,48 @@ test('partie contre le bot : il joue ses tours tout seul et la partie va à son 
   assert.ok(!('foeHand' in state.mg) && Array.isArray(state.mg.hand));
   socket.close();
 });
+
+test('conquête : un humain et deux bots, la partie va au bout (10 tours de table) sans blocage', async () => {
+  const socket = connect(`http://localhost:${port}`, { transports: ['websocket'], forceNew: true });
+  let state = null;
+  const waiters = [];
+  socket.on('state', (s) => {
+    state = s;
+    for (const w of [...waiters]) if (w.pred(s)) { waiters.splice(waiters.indexOf(w), 1); w.resolve(s); }
+  });
+  const emit = (event, payload = {}) =>
+    new Promise((resolve) => socket.timeout(3000).emit(event, payload, (err, res) => resolve(err ? { ok: false, error: 'timeout' } : res)));
+  const waitFor = (pred) =>
+    state && pred(state)
+      ? Promise.resolve(state)
+      : new Promise((resolve, reject) => {
+          waiters.push({ pred, resolve });
+          setTimeout(() => reject(new Error('timeout waiting for state')), 8000).unref();
+        });
+  await new Promise((resolve) => socket.on('connect', resolve));
+
+  assert.ok((await emit('room:create', { name: 'Carole', gameType: 'conquete' })).ok);
+  assert.ok((await emit('bot:add')).ok);
+  assert.ok((await emit('bot:add')).ok);
+  assert.ok((await emit('host:start')).ok);
+  const me = state.meId;
+
+  let guard = 0;
+  while (state.phase === 'playing') {
+    assert.ok(++guard < 100, 'la partie ne se termine pas');
+    const s = await waitFor((x) => x.phase !== 'playing' || (x.mg.ids[x.mg.turn] === x.meId && x.mg.phase === 'reinforce'));
+    if (s.phase !== 'playing') break;
+    const mine = Object.entries(s.mg.terr).find(([, v]) => s.mg.ids[v.o] === me);
+    if (mine) {
+      assert.ok((await emit('game:act', { type: 'place', territory: mine[0], count: s.mg.pending })).ok);
+      assert.ok((await emit('game:act', { type: 'endTurn' })).ok);
+    } else {
+      // plus aucun territoire : le joueur est éliminé, il n'a plus de tour
+      await waitFor((x) => x.phase !== 'playing');
+    }
+  }
+  assert.equal(state.phase, 'end');
+  assert.ok(state.mg.reason === 'ko' || state.mg.reason === 'rounds');
+  assert.equal(state.mg.ranking.length, 3);
+  socket.close();
+});

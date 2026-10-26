@@ -138,9 +138,9 @@ export default function Lobby({ state, act, notify }) {
             </li>
           ))}
         </ul>
-        {isHost && state.canBot && count < limits.max && !players.some((p) => p.bot) && (
+        {isHost && state.canBot && count < limits.max && players.filter((p) => p.bot).length < (miniGame.maxBots || 1) && (
           <button type="button" className="btn secondary" onClick={() => act('bot:add', {})}>
-            🤖 Jouer contre un bot
+            {(miniGame.maxBots || 1) > 1 ? '🤖 Ajouter un bot' : '🤖 Jouer contre un bot'}
           </button>
         )}
       </section>

@@ -1605,3 +1605,184 @@ button.sea-cell:disabled {
   display: flex;
   gap: 0.4rem;
 }
+
+/* --- Les Terres d'Aldoria (jeu de conquête) ---------------------------- */
+.cq-players {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+.cq-players li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.7rem;
+  background: var(--surface);
+  border: 2px solid transparent;
+}
+.cq-players li.on {
+  border-color: var(--fg);
+}
+.cq-players li.out {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+.cq-pname {
+  font-weight: 800;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cq-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: 900;
+  flex: none;
+}
+.cq-turn {
+  margin: 0;
+}
+.cq-mapwrap {
+  border-radius: 1rem;
+  background: rgba(0, 0, 0, 0.28);
+  overflow-x: auto;
+  touch-action: pan-x pan-y;
+}
+.cq-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--fg);
+}
+.cq-mapwrap.zoom .cq-map {
+  width: 170%;
+}
+.cq-node {
+  cursor: pointer;
+  outline: none;
+}
+.cq-node:focus-visible circle:not(.cq-ring) {
+  stroke: var(--focus);
+  stroke-width: 7;
+}
+.cq-army {
+  font: 900 30px var(--font-body);
+  paint-order: stroke;
+  pointer-events: none;
+}
+.cq-sym {
+  font: 700 15px var(--font-body);
+  opacity: 0.85;
+  pointer-events: none;
+}
+.cq-name {
+  font: 700 15px var(--font-body);
+  fill: #fff;
+  stroke: rgba(0, 0, 0, 0.8);
+  stroke-width: 4px;
+  paint-order: stroke;
+  pointer-events: none;
+}
+.cq-ring {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 4;
+  stroke-dasharray: 7 6;
+  animation: cq-dash 1.2s linear infinite;
+}
+@keyframes cq-dash {
+  to {
+    stroke-dashoffset: -26;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cq-ring {
+    animation: none;
+  }
+}
+.cq-battle {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.8rem;
+  background: var(--surface);
+}
+.cq-dice {
+  display: inline-flex;
+  gap: 0.25rem;
+  vertical-align: middle;
+}
+.cq-dice b {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 0.4rem;
+  font-weight: 900;
+  border: 2px solid currentColor;
+}
+.cq-dice.att b {
+  background: #e63946;
+  color: #fff;
+  border-color: #fff;
+}
+.cq-dice.def b {
+  background: #fbf8ff;
+  color: #1b1433;
+  border-color: #1b1433;
+}
+.cq-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.cq-actions .btn {
+  flex: 1 1 auto;
+  min-width: 4.2rem;
+}
+.cq-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+.cq-stepper strong {
+  font-size: 1.6rem;
+  min-width: 2.5rem;
+  text-align: center;
+}
+.cq-occupy {
+  display: grid;
+  gap: 0.5rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 2px dashed var(--line);
+}
+.cq-regions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+.cq-regions li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cq-regions li .muted {
+  margin-left: auto;
+}
+.cq-swatch {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.3rem;
+  flex: none;
+}

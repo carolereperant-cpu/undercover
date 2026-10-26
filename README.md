@@ -21,7 +21,7 @@ npm run dev:client      # terminal 2 : l'interface sur http://localhost:5173
 
 Vite affiche aussi une adresse du type `http://192.168.x.x:5173` : ouvre-la sur ton téléphone.
 
-Pour vérifier que tout fonctionne : `npm test` (128 tests).
+Pour vérifier que tout fonctionne : `npm test` (145 tests).
 
 
 
@@ -51,6 +51,7 @@ L'accueil propose un menu de jeux, filtrable par nombre de joueurs et par durée
 | Taboo (deux équipes, mots interdits) | 4 à 13 | 15 à 20 min |
 | Codenames (deux équipes, chefs d’espions) | 4 à 12 | 15 à 25 min |
 | Les Quatre Couronnes (duel de cartes, deck-building original, jouable contre un bot) | 2 | 15 à 20 min |
+| Les Terres d’Aldoria (conquête façon Risk, carte originale de 24 territoires, jouable avec des bots) | 2 à 6 | 30 à 45 min |
 
 **Ajouter un jeu** : créer `server/minigames/monjeu.js` (fiche `meta`, `init`, `act`, `view`), le déclarer dans `server/minigames/index.js`, puis ajouter son écran dans `client/src/games/` et une ligne dans `client/src/components/GameHost.jsx`. La règle d'or reste la même : `view(room, playerId)` ne renvoie que ce que ce joueur a le droit de voir (ses dés, son mot, jamais ceux des autres).
 

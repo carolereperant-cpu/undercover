@@ -1,0 +1,402 @@
+{
+ "width": 600,
+ "height": 860,
+ "regions": [
+  {
+   "id": "hauts-pays",
+   "name": "Hauts-Pays",
+   "bonus": 3,
+   "color": "#8ecae6"
+  },
+  {
+   "id": "sylve",
+   "name": "La Sylve",
+   "bonus": 3,
+   "color": "#52b788"
+  },
+  {
+   "id": "plaines",
+   "name": "Plaines Dorées",
+   "bonus": 2,
+   "color": "#e9c46a"
+  },
+  {
+   "id": "coeur",
+   "name": "Cœur du Royaume",
+   "bonus": 2,
+   "color": "#c77dff"
+  },
+  {
+   "id": "marais",
+   "name": "Marais de Brume",
+   "bonus": 4,
+   "color": "#9aa68a"
+  },
+  {
+   "id": "cote",
+   "name": "Côte des Marées",
+   "bonus": 3,
+   "color": "#4cc9f0"
+  }
+ ],
+ "territories": [
+  {
+   "id": "givrebois",
+   "name": "Givrebois",
+   "region": "hauts-pays",
+   "x": 76,
+   "y": 90
+  },
+  {
+   "id": "pic-du-corbeau",
+   "name": "Pic-du-Corbeau",
+   "region": "hauts-pays",
+   "x": 242,
+   "y": 68
+  },
+  {
+   "id": "fort-glacier",
+   "name": "Fort-Glacier",
+   "region": "hauts-pays",
+   "x": 82,
+   "y": 206
+  },
+  {
+   "id": "lac-muet",
+   "name": "Lac-Muet",
+   "region": "hauts-pays",
+   "x": 244,
+   "y": 228
+  },
+  {
+   "id": "chenaie-vieille",
+   "name": "Chênaie-Vieille",
+   "region": "sylve",
+   "x": 380,
+   "y": 92
+  },
+  {
+   "id": "clairiere-aux-loups",
+   "name": "Clairière-aux-Loups",
+   "region": "sylve",
+   "x": 494,
+   "y": 74
+  },
+  {
+   "id": "source-argentee",
+   "name": "Source-Argentée",
+   "region": "sylve",
+   "x": 376,
+   "y": 234
+  },
+  {
+   "id": "ronceval",
+   "name": "Ronceval",
+   "region": "sylve",
+   "x": 498,
+   "y": 210
+  },
+  {
+   "id": "ble-d-or",
+   "name": "Blé-d’Or",
+   "region": "plaines",
+   "x": 106,
+   "y": 352
+  },
+  {
+   "id": "gue-des-meuniers",
+   "name": "Gué-des-Meuniers",
+   "region": "plaines",
+   "x": 224,
+   "y": 372
+  },
+  {
+   "id": "colline-aux-cairns",
+   "name": "Colline-aux-Cairns",
+   "region": "plaines",
+   "x": 102,
+   "y": 514
+  },
+  {
+   "id": "marche-aux-grains",
+   "name": "Marché-aux-Grains",
+   "region": "plaines",
+   "x": 216,
+   "y": 488
+  },
+  {
+   "id": "couronne-haute",
+   "name": "Couronne-Haute",
+   "region": "coeur",
+   "x": 378,
+   "y": 346
+  },
+  {
+   "id": "tour-du-guet",
+   "name": "Tour-du-Guet",
+   "region": "coeur",
+   "x": 500,
+   "y": 374
+  },
+  {
+   "id": "vieux-pont",
+   "name": "Vieux-Pont",
+   "region": "coeur",
+   "x": 384,
+   "y": 496
+  },
+  {
+   "id": "cite-des-lanternes",
+   "name": "Cité-des-Lanternes",
+   "region": "coeur",
+   "x": 498,
+   "y": 506
+  },
+  {
+   "id": "marais-noirs",
+   "name": "Marais-Noirs",
+   "region": "marais",
+   "x": 94,
+   "y": 624
+  },
+  {
+   "id": "tourbiere",
+   "name": "Tourbière",
+   "region": "marais",
+   "x": 214,
+   "y": 650
+  },
+  {
+   "id": "ile-aux-brumes",
+   "name": "Île-aux-Brumes",
+   "region": "marais",
+   "x": 102,
+   "y": 790
+  },
+  {
+   "id": "cimes-noyees",
+   "name": "Cimes-Noyées",
+   "region": "marais",
+   "x": 222,
+   "y": 768
+  },
+  {
+   "id": "port-ecume",
+   "name": "Port-Écume",
+   "region": "cote",
+   "x": 384,
+   "y": 626
+  },
+  {
+   "id": "falaise-blanche",
+   "name": "Falaise-Blanche",
+   "region": "cote",
+   "x": 500,
+   "y": 648
+  },
+  {
+   "id": "recif-des-corsaires",
+   "name": "Récif-des-Corsaires",
+   "region": "cote",
+   "x": 376,
+   "y": 792
+  },
+  {
+   "id": "crique-perdue",
+   "name": "Crique-Perdue",
+   "region": "cote",
+   "x": 496,
+   "y": 772
+  }
+ ],
+ "links": [
+  [
+   "ble-d-or",
+   "colline-aux-cairns"
+  ],
+  [
+   "ble-d-or",
+   "fort-glacier"
+  ],
+  [
+   "ble-d-or",
+   "gue-des-meuniers"
+  ],
+  [
+   "ble-d-or",
+   "marche-aux-grains"
+  ],
+  [
+   "chenaie-vieille",
+   "clairiere-aux-loups"
+  ],
+  [
+   "chenaie-vieille",
+   "pic-du-corbeau"
+  ],
+  [
+   "chenaie-vieille",
+   "ronceval"
+  ],
+  [
+   "chenaie-vieille",
+   "source-argentee"
+  ],
+  [
+   "cimes-noyees",
+   "ile-aux-brumes"
+  ],
+  [
+   "cimes-noyees",
+   "marais-noirs"
+  ],
+  [
+   "cimes-noyees",
+   "recif-des-corsaires"
+  ],
+  [
+   "cimes-noyees",
+   "tourbiere"
+  ],
+  [
+   "cite-des-lanternes",
+   "couronne-haute"
+  ],
+  [
+   "cite-des-lanternes",
+   "falaise-blanche"
+  ],
+  [
+   "cite-des-lanternes",
+   "tour-du-guet"
+  ],
+  [
+   "cite-des-lanternes",
+   "vieux-pont"
+  ],
+  [
+   "clairiere-aux-loups",
+   "ronceval"
+  ],
+  [
+   "clairiere-aux-loups",
+   "source-argentee"
+  ],
+  [
+   "colline-aux-cairns",
+   "gue-des-meuniers"
+  ],
+  [
+   "colline-aux-cairns",
+   "marais-noirs"
+  ],
+  [
+   "colline-aux-cairns",
+   "marche-aux-grains"
+  ],
+  [
+   "couronne-haute",
+   "gue-des-meuniers"
+  ],
+  [
+   "couronne-haute",
+   "source-argentee"
+  ],
+  [
+   "couronne-haute",
+   "tour-du-guet"
+  ],
+  [
+   "couronne-haute",
+   "vieux-pont"
+  ],
+  [
+   "crique-perdue",
+   "falaise-blanche"
+  ],
+  [
+   "crique-perdue",
+   "port-ecume"
+  ],
+  [
+   "crique-perdue",
+   "recif-des-corsaires"
+  ],
+  [
+   "falaise-blanche",
+   "port-ecume"
+  ],
+  [
+   "falaise-blanche",
+   "recif-des-corsaires"
+  ],
+  [
+   "fort-glacier",
+   "givrebois"
+  ],
+  [
+   "fort-glacier",
+   "lac-muet"
+  ],
+  [
+   "fort-glacier",
+   "pic-du-corbeau"
+  ],
+  [
+   "givrebois",
+   "lac-muet"
+  ],
+  [
+   "givrebois",
+   "pic-du-corbeau"
+  ],
+  [
+   "gue-des-meuniers",
+   "lac-muet"
+  ],
+  [
+   "gue-des-meuniers",
+   "marche-aux-grains"
+  ],
+  [
+   "ile-aux-brumes",
+   "marais-noirs"
+  ],
+  [
+   "ile-aux-brumes",
+   "tourbiere"
+  ],
+  [
+   "lac-muet",
+   "pic-du-corbeau"
+  ],
+  [
+   "marais-noirs",
+   "tourbiere"
+  ],
+  [
+   "marche-aux-grains",
+   "vieux-pont"
+  ],
+  [
+   "port-ecume",
+   "recif-des-corsaires"
+  ],
+  [
+   "port-ecume",
+   "vieux-pont"
+  ],
+  [
+   "ronceval",
+   "source-argentee"
+  ],
+  [
+   "ronceval",
+   "tour-du-guet"
+  ],
+  [
+   "tour-du-guet",
+   "vieux-pont"
+  ]
+ ]
+}

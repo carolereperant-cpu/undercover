@@ -14,7 +14,11 @@ const helmet = require('helmet');
 const { Server } = require('socket.io');
 const game = require('./game');
 const { GAMES } = require('./minigames');
-const couronnesBot = require('./minigames/couronnes-bot');
+// Un « cerveau » de bot par jeu qui en propose un.
+const BOT_BRAINS = {
+  couronnes: require('./minigames/couronnes-bot'),
+  conquete: require('./minigames/conquete-bot'),
+};
 
 const PORT = Number(process.env.PORT) || 3001;
 const CLIENT_DIST = path.join(__dirname, '..', 'client', 'dist');
@@ -98,23 +102,28 @@ function broadcast(room) {
  * Un seul minuteur par salle : appeler scheduleBot plusieurs fois ne lance pas plusieurs tours en parallèle.
  */
 const botTimers = new Map(); // code -> timeout
+const botFailures = new Map(); // code -> échecs consécutifs du bot
 function scheduleBot(room) {
-  if (room.gameType !== 'couronnes' || room.phase !== 'playing' || !room.mg || botTimers.has(room.code)) return;
-  const bot = room.players.find((p) => p.bot);
-  if (!bot || room.mg.ids[room.mg.turn] !== bot.id) return;
+  const brain = BOT_BRAINS[room.gameType];
+  if (!brain || room.phase !== 'playing' || !room.mg || botTimers.has(room.code)) return;
+  const bot = room.players.find((p) => p.bot && p.id === room.mg.ids[room.mg.turn]);
+  if (!bot) return;
   const timer = setTimeout(() => {
     botTimers.delete(room.code);
     if (rooms.get(room.code) !== room || room.phase !== 'playing') return;
     try {
-      const move = couronnesBot.nextMove(room, bot.id);
+      const move = brain.nextMove(room, bot.id);
       if (!move) return;
-      const res = game.miniAct(room, bot, move);
-      // Filet de sécurité : si une action est refusée, on termine le tour plutôt que de bloquer la partie.
-      if (!res.ok) game.miniAct(room, bot, { type: 'endTurn' });
+      let res = game.miniAct(room, bot, move);
+      // Filet de sécurité : si une action est refusée, on tente de terminer le tour plutôt que de bloquer la partie.
+      if (!res.ok) res = game.miniAct(room, bot, { type: 'endTurn' });
+      botFailures.set(room.code, res.ok ? 0 : (botFailures.get(room.code) || 0) + 1);
     } catch (e) {
       console.error('[bot]', e);
-      game.miniAct(room, bot, { type: 'endTurn' });
+      botFailures.set(room.code, (botFailures.get(room.code) || 0) + 1);
     }
+    // Après 3 échecs de suite, on arrête le bot (la partie reste visible) plutôt que de tourner en boucle.
+    if ((botFailures.get(room.code) || 0) >= 3) return;
     broadcast(room);
   }, BOT_DELAY_MS);
   timer.unref?.();

@@ -185,9 +185,11 @@ function addBot(room, actorId) {
   if (room.phase !== 'lobby') return err('Impossible en cours de partie.');
   const meta = metaOf(room.gameType);
   if (!meta || !meta.bots) return err('Ce jeu n’a pas de bot.');
-  if (room.players.some((p) => p.bot)) return err('Il y a déjà un bot.');
+  const count = room.players.filter((p) => p.bot).length;
+  if (count >= (meta.maxBots || 1)) return err(count === 1 ? 'Il y a déjà un bot.' : 'Il y a déjà assez de bots.');
   if (room.players.length >= room.maxPlayers) return err('La salle est pleine.');
-  const bot = makePlayer(meta.botName || 'Bot');
+  const names = meta.botNames || [meta.botName || 'Bot'];
+  const bot = makePlayer(names[count % names.length]);
   bot.token = null;
   bot.bot = true;
   bot.connected = true;
@@ -195,10 +197,12 @@ function addBot(room, actorId) {
   return ok({ player: bot });
 }
 
+/** Retire le dernier bot ajouté. */
 function removeBot(room, actorId) {
   if (room.hostId !== actorId) return err('Seul l’hôte peut retirer le bot.');
   if (room.phase !== 'lobby') return err('Impossible en cours de partie.');
-  room.players = room.players.filter((p) => !p.bot);
+  const last = [...room.players].reverse().find((p) => p.bot);
+  if (last) room.players = room.players.filter((p) => p.id !== last.id);
   return ok();
 }
 

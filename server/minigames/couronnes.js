@@ -26,7 +26,8 @@ const meta = {
   maxMinutes: 20,
   noGuests: true,
   bots: true, // peut se jouer contre un bot (voir couronnes-bot.js)
-  botName: 'Bot Gobelin',
+  maxBots: 1,
+  botNames: ['Bot Gobelin'],
   rules: [
     'Chacun commence avec 40 points de vie et 10 cartes de base (écus, bâtons, amulettes). Tu pioches 5 cartes par tour.',
     'Joue tes cartes : l’or sert à acheter au marché, l’attaque blesse l’adversaire, les soins te rendent de la vie.',
